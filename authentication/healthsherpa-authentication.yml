@@ -1,0 +1,21 @@
+generated: '2026-07-19'
+method: searched
+source: openapi/healthsherpa-one-openapi.json
+docs: https://one.healthsherpa.com/docs.html
+summary:
+  types:
+  - apiKey
+  api_key_in:
+  - header
+  notes: >-
+    Single scheme on the public ONE API. Keys are issued at onboarding and revealed once in the
+    passwordless developer portal; server-side use only. No OAuth, sessions, or HMAC signing on ONE.
+    (Separately, the HealthSherpa Medicare Partner API offers v1 API keys and a v2 OAuth flow, and
+    the ICHRA Partner API also uses x-api-key — those surfaces publish no OpenAPI.)
+schemes:
+- name: ApiKeyAuth
+  type: apiKey
+  in: header
+  parameter: x-api-key
+  sources:
+  - openapi/healthsherpa-one-openapi.json
