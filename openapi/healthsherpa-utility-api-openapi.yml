@@ -1,0 +1,177 @@
+openapi: 3.1.0
+info:
+  title: HealthSherpa Public Enrollment Sessions Utility API
+  version: 0.1.0
+  description: 'Machine-readable contract for the currently available public HealthSherpa endpoints: GET /v1/ping, GET /v1/reference/counties, GET /v1/reference/issuers, GET /v1/reference/providers, POST /v1/quotes, the approval-gated POST /v1/enrollment-sessions, and the approval-gated direct enrollment endpoints GET /v1/enrollments, POST /v1/enrollments, PUT /v1/enrollments/{enrollment_id}, GET /v1/enrollments/{enrollment_id}, POST /v1/enrollments/{enrollment_id}/cancellations, POST /v1/enrollments/{enrollment_id}/terminations, POST /v1/enrollments/{enrollment_id}/submissions, GET /v1/enrollments/{enrollment_id}/payment_redirect, and POST /v1/enrollments/{enrollment_id}/supporting_documentation. Object schemas remain additive and clients should ignore response fields they do not recognize.
+
+
+    Most HealthSherpa-owned errors follow the unified `ErrorResponse` schema: `{ "error": { "code": string, "message": string, "details"?: object } }`. The direct enrollment endpoints instead return service failures as a top-level `errors[]` array: `{ "errors": [ { "code": string, "message": string, "field"?: string } ] }`. Edge-generated failures (API Gateway and WAF, before a request reaches the service) always use the unified `ErrorResponse` envelope, including on the direct enrollment endpoints — most notably a missing or invalid API key (`403 forbidden`).'
+servers:
+- url: https://api.one.healthsherpa.com
+  description: Production
+security:
+- ApiKeyAuth: []
+tags:
+- name: Utility
+paths:
+  /v1/ping:
+    get:
+      tags:
+      - Utility
+      summary: Confirm API reachability and key validity
+      operationId: ping
+      responses:
+        '200':
+          description: API request reached the partner API edge and the supplied API key was accepted.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PingResponse'
+              example:
+                environment: production
+                ok: true
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '502':
+          $ref: '#/components/responses/BadGateway'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+components:
+  responses:
+    Forbidden:
+      description: The API key is missing, invalid, not authorized for this API, or the request was blocked at the API edge. Public API requests may receive this edge-generated response before the backend can return a runtime 401. When a request reaches the backend, 403 may also mean the developer account or integration is not in the state required for that operation. For `POST /v1/enrollment-sessions`, that operation documents its own flow-scoped 403 requirements (both flows require approved on-exchange enrollment access, plus `agent_assisted` OAuth link vs `self_service` deeplink agent ID) instead of using this shared response reference.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error:
+              code: forbidden
+              message: The supplied API key is missing, invalid, or not authorized for this API.
+    InternalError:
+      description: An unexpected error occurred.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error:
+              code: internal_error
+              message: An unexpected error occurred.
+    ServiceUnavailable:
+      description: The API is temporarily unable to serve the request. This may be returned by the API edge when the backend is unhealthy, or by the backend when an upstream catalog, quoting, or lookup service is unavailable.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error:
+              code: service_unavailable
+              message: The service is temporarily unavailable. Please try again later.
+    BadGateway:
+      description: The API edge received an invalid response from the backend.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error:
+              code: bad_gateway
+              message: The API edge received an invalid response from the backend. Please try again later.
+    RateLimited:
+      description: Rate limit exceeded. Clients should back off and retry after the delay advertised in the Retry-After header.
+      headers:
+        Retry-After:
+          description: Number of seconds the client should wait before retrying.
+          schema:
+            type: integer
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error:
+              code: rate_limited
+              message: Request rate limit exceeded. Please slow down and retry shortly.
+    GatewayTimeout:
+      description: The API edge did not receive a timely response from the backend.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error:
+              code: gateway_timeout
+              message: The API edge did not receive a timely response from the backend. Please try again later.
+  schemas:
+    PingResponse:
+      type: object
+      additionalProperties: true
+      required:
+      - environment
+      - ok
+      properties:
+        environment:
+          type: string
+        ok:
+          type: boolean
+    ErrorResponse:
+      type: object
+      description: 'Canonical error envelope returned by HealthSherpa-owned API endpoint, infrastructure filter, and backend service failures. The direct enrollment endpoints return their own service failures using `EnrollmentErrorsResponse` (`errors[]`), but edge-generated failures on those endpoints (API Gateway and WAF, e.g. a missing or invalid API key) still use this `ErrorResponse` envelope. Clients should treat `error.code` as the stable programmatic identifier and surface `error.message` to humans. Recognized codes include:
+
+        - `unauthorized` (401) - backend runtime authentication failure when a request reaches a runtime that performs its own authentication
+
+        - `forbidden` (403) - missing/invalid/unauthorized API key at the API edge, or edge policy deny
+
+        - `invalid_request` (400) - request body or parameter validation failed
+
+        - `not_found` (404) - resource or route not found
+
+        - `payload_too_large` (413) - request body exceeded edge limits
+
+        - `unsupported_media_type` (415) - unsupported Content-Type
+
+        - `rate_limited` (429) - edge rate-limiting
+
+        - `service_unavailable` (503) - the edge is failing to reach the backend, or an upstream catalog/quoting/lookup service is unavailable
+
+        - `bad_gateway` (502) - the edge received an invalid response from the backend
+
+        - `gateway_timeout` (504) - the edge did not receive a timely response from the backend
+
+        - `internal_error` (500) - unexpected server error'
+      additionalProperties: true
+      required:
+      - error
+      properties:
+        error:
+          type: object
+          additionalProperties: true
+          required:
+          - code
+          - message
+          properties:
+            code:
+              type: string
+              description: Stable, machine-readable identifier for the error class (see ErrorResponse description for recognized values). Clients should branch on this field rather than on `message` or HTTP status alone.
+            message:
+              type: string
+              description: Human-readable explanation of the error, suitable for logging or surfacing to an end user.
+            details:
+              type: object
+              description: Optional per-field validation details. Keys are dotted/indexed paths (e.g. `household.applicants[0].age`) and values are arrays of full-sentence error messages.
+              additionalProperties:
+                type: array
+                items:
+                  type: string
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: x-api-key

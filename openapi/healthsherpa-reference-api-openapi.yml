@@ -1,0 +1,520 @@
+openapi: 3.1.0
+info:
+  title: HealthSherpa Public Enrollment Sessions Reference API
+  version: 0.1.0
+  description: 'Machine-readable contract for the currently available public HealthSherpa endpoints: GET /v1/ping, GET /v1/reference/counties, GET /v1/reference/issuers, GET /v1/reference/providers, POST /v1/quotes, the approval-gated POST /v1/enrollment-sessions, and the approval-gated direct enrollment endpoints GET /v1/enrollments, POST /v1/enrollments, PUT /v1/enrollments/{enrollment_id}, GET /v1/enrollments/{enrollment_id}, POST /v1/enrollments/{enrollment_id}/cancellations, POST /v1/enrollments/{enrollment_id}/terminations, POST /v1/enrollments/{enrollment_id}/submissions, GET /v1/enrollments/{enrollment_id}/payment_redirect, and POST /v1/enrollments/{enrollment_id}/supporting_documentation. Object schemas remain additive and clients should ignore response fields they do not recognize.
+
+
+    Most HealthSherpa-owned errors follow the unified `ErrorResponse` schema: `{ "error": { "code": string, "message": string, "details"?: object } }`. The direct enrollment endpoints instead return service failures as a top-level `errors[]` array: `{ "errors": [ { "code": string, "message": string, "field"?: string } ] }`. Edge-generated failures (API Gateway and WAF, before a request reaches the service) always use the unified `ErrorResponse` envelope, including on the direct enrollment endpoints — most notably a missing or invalid API key (`403 forbidden`).'
+servers:
+- url: https://api.one.healthsherpa.com
+  description: Production
+security:
+- ApiKeyAuth: []
+tags:
+- name: Reference
+paths:
+  /v1/reference/counties:
+    get:
+      tags:
+      - Reference
+      summary: List counties for a ZIP code
+      description: Returns the counties that overlap the supplied ZIP code. A ZIP code can cross state lines; each returned county's `state` is the canonical state for its `fips_code`. Use the selected fips_code in subsequent quote requests.
+      operationId: listCounties
+      parameters:
+      - name: zip_code
+        in: query
+        required: true
+        description: Five-digit ZIP code to resolve.
+        schema:
+          type: string
+          pattern: ^[0-9]{5}$
+      responses:
+        '200':
+          description: One or more counties found for the ZIP code.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CountiesResponse'
+              example:
+                counties:
+                - fips_code: '12086'
+                  name: Miami-Dade County
+                  state: FL
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '502':
+          $ref: '#/components/responses/BadGateway'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+  /v1/reference/issuers:
+    get:
+      tags:
+      - Reference
+      summary: List QHP issuers active in a state
+      description: 'Returns the QHP issuers active in the requested state and plan year. Each entry combines a sortable display name (issuer marketing name when present, legal name otherwise) with the canonical 5-digit HIOS issuer ID for use in subsequent quote filters.
+
+
+        **Plan year:** the optional `plan_year` query parameter pins the lookup to a specific year and defaults to the current ACA plan year (open enrollment for 2027 begins November 1 2026). Specify `plan_year` explicitly when reconciling enrollments from a prior year or when shopping the next year before the rollover.
+
+
+        **Response ordering:** entries are sorted by `name` (case-insensitive) and then by `hios_issuer_id` as a stable tiebreaker. Clients can iterate the array directly without re-sorting.'
+      operationId: listIssuers
+      parameters:
+      - name: state
+        in: query
+        required: true
+        description: Two-letter uppercase US state code (e.g. `FL`). Lowercase values are rejected with `400 invalid_request` — clients must upcase before sending.
+        example: FL
+        schema:
+          type: string
+          pattern: ^[A-Z]{2}$
+      - name: plan_year
+        in: query
+        required: false
+        description: ACA plan year to scope the issuer list to. Defaults to the current ACA plan year when omitted.
+        schema:
+          type: integer
+          minimum: 2020
+          maximum: 2099
+        example: 2026
+      responses:
+        '200':
+          description: One or more issuers found for the state.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IssuersResponse'
+              example:
+                issuers:
+                - name: Gulf Coast Coverage Co.
+                  hios_issuer_id: '33333'
+                - name: Sunshine State Health
+                  hios_issuer_id: '12345'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '502':
+          $ref: '#/components/responses/BadGateway'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+  /v1/reference/providers:
+    get:
+      tags:
+      - Reference
+      summary: Search healthcare providers by name near a ZIP code
+      description: 'Searches healthcare providers (individuals and facilities) by name near a ZIP code and returns paginated results with NPI and address data. This is a search-only endpoint; there is no "list all providers" mode.
+
+
+        Use the returned 10-digit `npi` values when building provider selections, for example the `providers` field on an enrollment session.
+
+
+        **Channel:** the required `exchange` parameter selects the marketplace channel (`on_exchange` or `off_exchange`).
+
+
+        **Pagination:** results are paginated with the nested `page[number]` and `page[size]` query parameters, mirroring the quoting endpoint''s `page` object. `page[number]` defaults to 1 (values below 1 are treated as 1) and `page[size]` accepts 1 to 50, defaulting to 50 (values outside the range resolve to 50). Pagination metadata is returned under `meta` (`page_number`, `page_size`, `result_count`). An empty search returns `providers: []` with `result_count` 0.'
+      operationId: searchProviders
+      parameters:
+      - name: query
+        in: query
+        required: true
+        description: Provider or facility name search term.
+        schema:
+          type: string
+          minLength: 1
+        example: Smith
+      - name: zip_code
+        in: query
+        required: true
+        description: Five-digit ZIP code used for the geographic (near-ZIP) search.
+        schema:
+          type: string
+          pattern: ^[0-9]{5}$
+        example: '85001'
+      - name: exchange
+        in: query
+        required: true
+        description: Marketplace channel to search. Required. One of `on_exchange` or `off_exchange`.
+        schema:
+          type: string
+          enum:
+          - on_exchange
+          - off_exchange
+        example: on_exchange
+      - name: page[number]
+        in: query
+        required: false
+        description: Page number (mirrors quoting's page.number). Defaults to 1; values below 1 are treated as 1.
+        schema:
+          type: integer
+          minimum: 1
+          default: 1
+        example: 1
+      - name: page[size]
+        in: query
+        required: false
+        description: Results per page (mirrors quoting's page.size), from 1 to 50. Defaults to 50; values outside this range resolve to 50.
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 50
+          default: 50
+        example: 50
+      responses:
+        '200':
+          description: Provider search results for the current page. An empty search returns an empty `providers` array.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProvidersResponse'
+              example:
+                providers:
+                - first_name: John
+                  last_name: Smith
+                  organization_name: null
+                  display_name: John Smith, MD
+                  credential: MD
+                  entity_type: individual
+                  npi: '1972113918'
+                  specialty: Family Medicine
+                  specialization: General Practice
+                  address_line_1: 123 Main St
+                  city: Phoenix
+                  state: AZ
+                  zip_code: '85001'
+                meta:
+                  page_number: 1
+                  page_size: 50
+                  result_count: 1
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '502':
+          $ref: '#/components/responses/BadGateway'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+components:
+  responses:
+    NotFound:
+      description: The requested resource could not be found. Emitted by the backend when no supported data matches the request (for example, no counties for a ZIP), and by the API edge for unknown paths.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error:
+              code: not_found
+              message: No counties found for ZIP 12345.
+    Forbidden:
+      description: The API key is missing, invalid, not authorized for this API, or the request was blocked at the API edge. Public API requests may receive this edge-generated response before the backend can return a runtime 401. When a request reaches the backend, 403 may also mean the developer account or integration is not in the state required for that operation. For `POST /v1/enrollment-sessions`, that operation documents its own flow-scoped 403 requirements (both flows require approved on-exchange enrollment access, plus `agent_assisted` OAuth link vs `self_service` deeplink agent ID) instead of using this shared response reference.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error:
+              code: forbidden
+              message: The supplied API key is missing, invalid, or not authorized for this API.
+    InternalError:
+      description: An unexpected error occurred.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error:
+              code: internal_error
+              message: An unexpected error occurred.
+    ServiceUnavailable:
+      description: The API is temporarily unable to serve the request. This may be returned by the API edge when the backend is unhealthy, or by the backend when an upstream catalog, quoting, or lookup service is unavailable.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error:
+              code: service_unavailable
+              message: The service is temporarily unavailable. Please try again later.
+    BadGateway:
+      description: The API edge received an invalid response from the backend.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error:
+              code: bad_gateway
+              message: The API edge received an invalid response from the backend. Please try again later.
+    BadRequest:
+      description: 'Request validation failed. The response body''s `error.details` map contains per-field messages when the backend produced the error; edge-generated 400s omit `details`.
+
+
+        A malformed `Idempotency-Key` header is also rejected here with `code: idempotency_key_invalid`.'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error:
+              code: invalid_request
+              message: Validation failed.
+              details:
+                zip_code:
+                - ZIP code must be 5 digits
+    RateLimited:
+      description: Rate limit exceeded. Clients should back off and retry after the delay advertised in the Retry-After header.
+      headers:
+        Retry-After:
+          description: Number of seconds the client should wait before retrying.
+          schema:
+            type: integer
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error:
+              code: rate_limited
+              message: Request rate limit exceeded. Please slow down and retry shortly.
+    GatewayTimeout:
+      description: The API edge did not receive a timely response from the backend.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error:
+              code: gateway_timeout
+              message: The API edge did not receive a timely response from the backend. Please try again later.
+  schemas:
+    ProvidersResponse:
+      type: object
+      additionalProperties: true
+      required:
+      - providers
+      - meta
+      properties:
+        providers:
+          type: array
+          description: Provider results for the current page. Empty when there are no matches.
+          items:
+            $ref: '#/components/schemas/ProviderEntity'
+        meta:
+          $ref: '#/components/schemas/ProvidersResponseMeta'
+    CountiesResponse:
+      type: object
+      additionalProperties: true
+      required:
+      - counties
+      properties:
+        counties:
+          type: array
+          items:
+            $ref: '#/components/schemas/CountySummary'
+    IssuersResponse:
+      type: object
+      additionalProperties: true
+      required:
+      - issuers
+      properties:
+        issuers:
+          type: array
+          description: Issuers active in the requested state, sorted by `name` (case-insensitive) and then by `hios_issuer_id` as a stable tiebreaker. One entry per HIOS issuer.
+          items:
+            $ref: '#/components/schemas/IssuerSummary'
+    CountySummary:
+      type: object
+      additionalProperties: true
+      required:
+      - fips_code
+      - name
+      - state
+      properties:
+        fips_code:
+          type: string
+          description: Five-digit county FIPS code. The first two digits identify the county's state.
+        name:
+          type: string
+        state:
+          type: string
+          description: Two-letter state code for this county, derived from the FIPS code. Border ZIP responses can include counties from more than one state.
+    ErrorResponse:
+      type: object
+      description: 'Canonical error envelope returned by HealthSherpa-owned API endpoint, infrastructure filter, and backend service failures. The direct enrollment endpoints return their own service failures using `EnrollmentErrorsResponse` (`errors[]`), but edge-generated failures on those endpoints (API Gateway and WAF, e.g. a missing or invalid API key) still use this `ErrorResponse` envelope. Clients should treat `error.code` as the stable programmatic identifier and surface `error.message` to humans. Recognized codes include:
+
+        - `unauthorized` (401) - backend runtime authentication failure when a request reaches a runtime that performs its own authentication
+
+        - `forbidden` (403) - missing/invalid/unauthorized API key at the API edge, or edge policy deny
+
+        - `invalid_request` (400) - request body or parameter validation failed
+
+        - `not_found` (404) - resource or route not found
+
+        - `payload_too_large` (413) - request body exceeded edge limits
+
+        - `unsupported_media_type` (415) - unsupported Content-Type
+
+        - `rate_limited` (429) - edge rate-limiting
+
+        - `service_unavailable` (503) - the edge is failing to reach the backend, or an upstream catalog/quoting/lookup service is unavailable
+
+        - `bad_gateway` (502) - the edge received an invalid response from the backend
+
+        - `gateway_timeout` (504) - the edge did not receive a timely response from the backend
+
+        - `internal_error` (500) - unexpected server error'
+      additionalProperties: true
+      required:
+      - error
+      properties:
+        error:
+          type: object
+          additionalProperties: true
+          required:
+          - code
+          - message
+          properties:
+            code:
+              type: string
+              description: Stable, machine-readable identifier for the error class (see ErrorResponse description for recognized values). Clients should branch on this field rather than on `message` or HTTP status alone.
+            message:
+              type: string
+              description: Human-readable explanation of the error, suitable for logging or surfacing to an end user.
+            details:
+              type: object
+              description: Optional per-field validation details. Keys are dotted/indexed paths (e.g. `household.applicants[0].age`) and values are arrays of full-sentence error messages.
+              additionalProperties:
+                type: array
+                items:
+                  type: string
+    IssuerSummary:
+      type: object
+      additionalProperties: true
+      required:
+      - name
+      - hios_issuer_id
+      properties:
+        name:
+          type: string
+          description: Issuer display name.
+        hios_issuer_id:
+          type: string
+          pattern: ^[0-9]{5}$
+          description: Five-digit HIOS issuer ID.
+    ProviderEntity:
+      type: object
+      additionalProperties: true
+      required:
+      - npi
+      properties:
+        first_name:
+          type:
+          - string
+          - 'null'
+          description: Individual provider's first name. Null for organizations.
+        last_name:
+          type:
+          - string
+          - 'null'
+          description: Individual provider's last name. Null for organizations.
+        organization_name:
+          type:
+          - string
+          - 'null'
+          description: Organization marketing name. Null for individuals.
+        display_name:
+          type:
+          - string
+          - 'null'
+          description: 'Human-friendly label: organization name for facilities, or "First Last, Credential" for individuals.'
+        credential:
+          type:
+          - string
+          - 'null'
+          description: Professional credential (e.g. MD, DO, NP).
+        entity_type:
+          type:
+          - string
+          - 'null'
+          description: Provider entity type, typically `individual` or `organization`.
+        npi:
+          type: string
+          pattern: ^[0-9]{10}$
+          description: Ten-digit National Provider Identifier. Use this value (no suffix) when referencing the provider in enrollment requests.
+        specialty:
+          type:
+          - string
+          - 'null'
+          description: Primary taxonomy classification (e.g. Family Medicine).
+        specialization:
+          type:
+          - string
+          - 'null'
+          description: Primary taxonomy specialization (e.g. General Practice).
+        address_line_1:
+          type:
+          - string
+          - 'null'
+          description: First line of the provider's street address (number and street).
+        city:
+          type:
+          - string
+          - 'null'
+        state:
+          type:
+          - string
+          - 'null'
+          description: Two-letter state code.
+        zip_code:
+          type:
+          - string
+          - 'null'
+          description: The provider's address ZIP code (not the search ZIP).
+    ProvidersResponseMeta:
+      type: object
+      additionalProperties: true
+      required:
+      - page_number
+      - page_size
+      - result_count
+      properties:
+        page_number:
+          type: integer
+          description: Current page number.
+        page_size:
+          type: integer
+          description: Results per page (at most 50).
+        result_count:
+          type: integer
+          description: Total number of matches across all pages.
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: x-api-key

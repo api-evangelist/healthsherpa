@@ -1,0 +1,2339 @@
+openapi: 3.1.0
+info:
+  title: HealthSherpa Public Enrollment Sessions Enrollments API
+  version: 0.1.0
+  description: 'Machine-readable contract for the currently available public HealthSherpa endpoints: GET /v1/ping, GET /v1/reference/counties, GET /v1/reference/issuers, GET /v1/reference/providers, POST /v1/quotes, the approval-gated POST /v1/enrollment-sessions, and the approval-gated direct enrollment endpoints GET /v1/enrollments, POST /v1/enrollments, PUT /v1/enrollments/{enrollment_id}, GET /v1/enrollments/{enrollment_id}, POST /v1/enrollments/{enrollment_id}/cancellations, POST /v1/enrollments/{enrollment_id}/terminations, POST /v1/enrollments/{enrollment_id}/submissions, GET /v1/enrollments/{enrollment_id}/payment_redirect, and POST /v1/enrollments/{enrollment_id}/supporting_documentation. Object schemas remain additive and clients should ignore response fields they do not recognize.
+
+
+    Most HealthSherpa-owned errors follow the unified `ErrorResponse` schema: `{ "error": { "code": string, "message": string, "details"?: object } }`. The direct enrollment endpoints instead return service failures as a top-level `errors[]` array: `{ "errors": [ { "code": string, "message": string, "field"?: string } ] }`. Edge-generated failures (API Gateway and WAF, before a request reaches the service) always use the unified `ErrorResponse` envelope, including on the direct enrollment endpoints — most notably a missing or invalid API key (`403 forbidden`).'
+servers:
+- url: https://api.one.healthsherpa.com
+  description: Production
+security:
+- ApiKeyAuth: []
+tags:
+- name: Enrollments
+paths:
+  /v1/enrollments:
+    get:
+      tags:
+      - Enrollments
+      summary: List direct enrollment applications
+      description: Approval-gated direct enrollment API for listing off-exchange applications for the approved account. Send `product=ichra` and `exchange=off_exchange` as required query parameters so HealthSherpa ONE can validate the direct-enrollment routing channel. The response is paginated and can be filtered by policy status, partner or employer ids, plan identifiers, plan year, and last-updated timestamp. Only the documented list filters are supported; unsupported query parameters are rejected with `400 invalid_request`. Service failures are returned as a top-level `errors[]` array with `code`, `message`, and optional `field`; failures blocked at the API edge use the unified `error` envelope.
+      operationId: listEnrollments
+      parameters:
+      - name: product
+        in: query
+        required: true
+        description: Direct-enrollment product. Must be `ichra`.
+        schema:
+          type: string
+          enum:
+          - ichra
+      - name: exchange
+        in: query
+        required: true
+        description: Direct-enrollment routing channel. Must be `off_exchange`.
+        schema:
+          type: string
+          enum:
+          - off_exchange
+      - name: policy_status
+        in: query
+        required: false
+        description: Filter applications by carrier policy status.
+        schema:
+          type: string
+          enum:
+          - draft
+          - pending_effectuation
+          - effectuated
+          - submission_failed
+          - cancelled
+          - terminated
+      - name: external_id
+        in: query
+        required: false
+        description: Filter by the partner-supplied external application id.
+        schema:
+          type: string
+      - name: plan_year
+        in: query
+        required: false
+        description: Filter by application plan year.
+        schema:
+          type: integer
+      - name: issuer_hios_id
+        in: query
+        required: false
+        description: Filter by issuer HIOS id.
+        schema:
+          type: string
+      - name: plan_hios_id
+        in: query
+        required: false
+        description: Filter by plan HIOS id.
+        schema:
+          type: string
+      - name: employer_external_id
+        in: query
+        required: false
+        description: Filter by the employer's external identifier.
+        schema:
+          type: string
+      - name: updated_since
+        in: query
+        required: false
+        description: ISO 8601 timestamp. Returns applications updated after this time.
+        schema:
+          type: string
+          format: date-time
+      - name: limit
+        in: query
+        required: false
+        description: Maximum number of applications to return.
+        schema:
+          type: integer
+          minimum: 1
+          default: 25
+          maximum: 100
+      - name: offset
+        in: query
+        required: false
+        description: Zero-based pagination offset.
+        schema:
+          type: integer
+          minimum: 0
+          default: 0
+      responses:
+        '200':
+          $ref: '#/components/responses/EnrollmentListResponse'
+        '400':
+          $ref: '#/components/responses/EnrollmentError'
+        '401':
+          $ref: '#/components/responses/EnrollmentError'
+        '403':
+          $ref: '#/components/responses/EnrollmentError'
+        '429':
+          $ref: '#/components/responses/EnrollmentError'
+        '500':
+          $ref: '#/components/responses/EnrollmentError'
+        '502':
+          $ref: '#/components/responses/BadGateway'
+        '503':
+          $ref: '#/components/responses/EnrollmentError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+    post:
+      tags:
+      - Enrollments
+      summary: Create a direct enrollment application
+      description: 'Approval-gated direct enrollment API for partners that need API-level control over off-exchange applications. Send the application payload at the request root and include the HealthSherpa ONE `context` object for routing. Direct enrollment currently supports `context.product = "ichra"` and `context.exchange = "off_exchange"`; other products and exchanges are not supported here. Use `POST /v1/enrollment-sessions` for on-exchange enrollment. HealthSherpa ONE uses `context` only for routing and applies the agent and TPA identifiers (`_agent_id`, `tpa_slug`) from your approved account setup; caller-supplied `_agent_id`, `tpa_slug`, `actor.agent_id`, and `agent_of_record` are rejected.
+
+
+        Successful responses include the application data, current validation state, and `next_actions[]` when actions are currently available. `next_actions[].href` values point to public `/v1/enrollments` routes. Service failures (missing or malformed idempotency keys, authorization failures, invalid JSON bodies, validation errors, and service-availability errors) are returned as a top-level `errors[]` array with `code`, `message`, and optional `field`. Edge-generated failures (API Gateway and WAF) instead use the unified `error` envelope: a missing or invalid API key returns `403 forbidden`, and `413`, `415`, edge `429`, and gateway `502`/`504` also use that envelope. See the `EnrollmentError` response for both shapes.'
+      operationId: createEnrollment
+      parameters:
+      - name: Idempotency-Key
+        in: header
+        required: true
+        description: Required partner-supplied request identifier (1-255 chars, `A-Z`, `a-z`, `0-9`, `-`, `_`). Scoped by API key and retained for 24 hours.
+        schema:
+          type: string
+          pattern: ^[A-Za-z0-9_\-]{1,255}$
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EnrollmentRequest'
+            example:
+              context:
+                product: ichra
+                exchange: off_exchange
+                plan_year: 2026
+              external_id: crm-application-123
+              plan_hios_id: 12345CO1234501
+              desired_effective_date: '2026-01-01'
+              applicants:
+                primary:
+                  first_name: Jane
+                  last_name: Doe
+                  date_of_birth: '1990-01-01'
+                  gender: female
+                  email: jane@example.com
+                  phone: '5551234567'
+                  signature: Jane Doe
+              residential_address:
+                street_address_1: 123 Main St
+                city: Denver
+                state: CO
+                zip_code: '80202'
+              special_enrollment_period:
+                event_type: offered_ichra
+                event_date: '2025-12-01'
+      responses:
+        '200':
+          $ref: '#/components/responses/EnrollmentResponse'
+        '201':
+          $ref: '#/components/responses/EnrollmentResponse'
+        '400':
+          $ref: '#/components/responses/EnrollmentError'
+        '401':
+          $ref: '#/components/responses/EnrollmentError'
+        '403':
+          $ref: '#/components/responses/EnrollmentError'
+        '409':
+          $ref: '#/components/responses/EnrollmentError'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '422':
+          $ref: '#/components/responses/EnrollmentError'
+        '429':
+          $ref: '#/components/responses/EnrollmentError'
+        '500':
+          $ref: '#/components/responses/EnrollmentError'
+        '502':
+          $ref: '#/components/responses/BadGateway'
+        '503':
+          $ref: '#/components/responses/EnrollmentError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+  /v1/enrollments/{enrollment_id}/submissions:
+    post:
+      tags:
+      - Enrollments
+      summary: Submit a direct enrollment application
+      description: 'Approval-gated direct enrollment API for submitting an off-exchange application to the carrier. Send the HealthSherpa ONE `context` object with `product = "ichra"` and `exchange = "off_exchange"`; `plan_year` is not required for submission. Check `errors[]` on the application response before calling; submission fails with `422` if the application still has outstanding errors. A successful call returns `202 Accepted`; submission processing can continue asynchronously, so poll `GET /v1/enrollments/{enrollment_id}?product=ichra&exchange=off_exchange` until `policy_status` reflects the final outcome. If a network timeout or other unknown-result failure occurs after calling submit, poll readback before retrying so you do not turn an already-accepted submission into a duplicate/no-change response.
+
+
+        For carriers that support post-enrollment changes, call `PUT /v1/enrollments/{enrollment_id}` to send supported changes, then call this endpoint again to resubmit the tracked changes. The API returns `422` if no changes have been made since the last submission. Service failures are returned as a top-level `errors[]` array with `code`, `message`, and optional `field`; failures blocked at the API edge use the unified `error` envelope.'
+      operationId: submitEnrollmentApplication
+      parameters:
+      - name: enrollment_id
+        in: path
+        required: true
+        description: Application id returned by `POST /v1/enrollments`.
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SubmitRequest'
+            example:
+              context:
+                product: ichra
+                exchange: off_exchange
+      responses:
+        '202':
+          $ref: '#/components/responses/SubmitEnrollmentResponse'
+        '400':
+          $ref: '#/components/responses/EnrollmentError'
+        '401':
+          $ref: '#/components/responses/EnrollmentError'
+        '403':
+          $ref: '#/components/responses/EnrollmentError'
+        '404':
+          $ref: '#/components/responses/EnrollmentError'
+        '422':
+          $ref: '#/components/responses/EnrollmentError'
+        '429':
+          $ref: '#/components/responses/EnrollmentError'
+        '500':
+          $ref: '#/components/responses/EnrollmentError'
+        '502':
+          $ref: '#/components/responses/BadGateway'
+        '503':
+          $ref: '#/components/responses/EnrollmentError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+  /v1/enrollments/{enrollment_id}/cancellations:
+    post:
+      tags:
+      - Enrollments
+      summary: Cancel a direct enrollment application
+      description: Approval-gated direct enrollment API for cancelling an off-exchange application that is pending effectuation. Send the HealthSherpa ONE `context` object with `product = "ichra"` and `exchange = "off_exchange"`. Not all carriers support cancellation; check the application read response for carrier capabilities before calling. A successful response returns `202 Accepted` with the updated status-change data. If a network timeout or other unknown-result failure occurs after calling cancel, poll `GET /v1/enrollments/{enrollment_id}?product=ichra&exchange=off_exchange` before retrying so you do not turn an already-accepted cancellation into a misleading not-allowed/no-op retry response. Service failures use a top-level `errors[]` array with `code`, `message`, and optional `field`; cancellation-not-allowed responses use `400 invalid_field_value`. Failures blocked at the API edge use the unified `error` envelope.
+      operationId: cancelEnrollmentApplication
+      parameters:
+      - name: enrollment_id
+        in: path
+        required: true
+        description: Application id returned by `POST /v1/enrollments`.
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EnrollmentActionContextRequest'
+            example:
+              context:
+                product: ichra
+                exchange: off_exchange
+      responses:
+        '202':
+          $ref: '#/components/responses/EnrollmentStatusChangeResponse'
+        '400':
+          $ref: '#/components/responses/EnrollmentError'
+        '401':
+          $ref: '#/components/responses/EnrollmentError'
+        '403':
+          $ref: '#/components/responses/EnrollmentError'
+        '404':
+          $ref: '#/components/responses/EnrollmentError'
+        '429':
+          $ref: '#/components/responses/EnrollmentError'
+        '500':
+          $ref: '#/components/responses/EnrollmentError'
+        '502':
+          $ref: '#/components/responses/BadGateway'
+        '503':
+          $ref: '#/components/responses/EnrollmentError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+  /v1/enrollments/{enrollment_id}/terminations:
+    post:
+      tags:
+      - Enrollments
+      summary: Terminate an active policy
+      description: Approval-gated direct enrollment API for terminating an active off-exchange policy before its natural expiration date. Send the HealthSherpa ONE `context` object with `product = "ichra"` and `exchange = "off_exchange"`. Not all carriers support termination; check the application read response for carrier capabilities before calling. A successful response returns `202 Accepted` with the updated status-change data. If a network timeout or other unknown-result failure occurs after calling terminate, poll `GET /v1/enrollments/{enrollment_id}?product=ichra&exchange=off_exchange` before retrying so you do not turn an already-accepted termination into a misleading not-allowed/no-op retry response. Service failures use a top-level `errors[]` array with `code`, `message`, and optional `field`; termination-not-allowed responses use `400 invalid_field_value`. Failures blocked at the API edge use the unified `error` envelope.
+      operationId: terminateEnrollmentApplication
+      parameters:
+      - name: enrollment_id
+        in: path
+        required: true
+        description: Application id returned by `POST /v1/enrollments`.
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EnrollmentActionContextRequest'
+            example:
+              context:
+                product: ichra
+                exchange: off_exchange
+      responses:
+        '202':
+          $ref: '#/components/responses/EnrollmentStatusChangeResponse'
+        '400':
+          $ref: '#/components/responses/EnrollmentError'
+        '401':
+          $ref: '#/components/responses/EnrollmentError'
+        '403':
+          $ref: '#/components/responses/EnrollmentError'
+        '404':
+          $ref: '#/components/responses/EnrollmentError'
+        '429':
+          $ref: '#/components/responses/EnrollmentError'
+        '500':
+          $ref: '#/components/responses/EnrollmentError'
+        '502':
+          $ref: '#/components/responses/BadGateway'
+        '503':
+          $ref: '#/components/responses/EnrollmentError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+  /v1/enrollments/{enrollment_id}/payment_redirect:
+    get:
+      tags:
+      - Enrollments
+      summary: Get payment redirect data
+      description: 'Approval-gated direct enrollment API for retrieving the carrier payment redirect data for an off-exchange application. Send `product=ichra` and `exchange=off_exchange` as required query parameters so HealthSherpa ONE can validate the direct-enrollment routing channel. Use this when the application response includes `payment_instructions.payment_redirect_supported = true`.
+
+
+        The response includes the carrier endpoint URL, the HTTP method, and form fields to submit in the shopper''s browser. The keys and values in `fields` vary by carrier. Do not interpret, filter, rename, or modify them; include every returned field exactly as provided as hidden inputs in a form POST to `endpoint`. Service failures are returned as a top-level `errors[]` array with `code`, `message`, and optional `field`; failures blocked at the API edge use the unified `error` envelope.'
+      operationId: getEnrollmentPaymentRedirect
+      parameters:
+      - name: enrollment_id
+        in: path
+        required: true
+        description: Application id returned by `POST /v1/enrollments`.
+        schema:
+          type: string
+      - name: product
+        in: query
+        required: true
+        description: Direct-enrollment product. Must be `ichra`.
+        schema:
+          type: string
+          enum:
+          - ichra
+      - name: exchange
+        in: query
+        required: true
+        description: Direct-enrollment routing channel. Must be `off_exchange`.
+        schema:
+          type: string
+          enum:
+          - off_exchange
+      responses:
+        '200':
+          $ref: '#/components/responses/PaymentRedirectResponse'
+        '401':
+          $ref: '#/components/responses/EnrollmentError'
+        '403':
+          $ref: '#/components/responses/EnrollmentError'
+        '404':
+          $ref: '#/components/responses/EnrollmentError'
+        '422':
+          $ref: '#/components/responses/EnrollmentError'
+        '429':
+          $ref: '#/components/responses/EnrollmentError'
+        '500':
+          $ref: '#/components/responses/EnrollmentError'
+        '502':
+          $ref: '#/components/responses/BadGateway'
+        '503':
+          $ref: '#/components/responses/EnrollmentError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+  /v1/enrollments/{enrollment_id}/supporting_documentation:
+    post:
+      tags:
+      - Enrollments
+      summary: Upload supporting documentation
+      description: 'Approval-gated direct enrollment API for uploading a document that supports SEP eligibility for an off-exchange application. Some carriers require documentation for certain SEP reasons before coverage is effectuated. Use `GET /v1/enrollments/{enrollment_id}?product=ichra&exchange=off_exchange` to check `document_status`.
+
+
+        Send the HealthSherpa ONE `context` object with `product = "ichra"` and `exchange = "off_exchange"` plus either `multipart/form-data` with a binary `file`, or `application/json` with the same file bytes in `file.content_base64`. HealthSherpa ONE does not persist the uploaded file after processing. Service failures are returned as a top-level `errors[]` array with `code`, `message`, and optional `field`; failures blocked at the API edge use the unified `error` envelope.'
+      operationId: uploadEnrollmentSupportingDocumentation
+      parameters:
+      - name: enrollment_id
+        in: path
+        required: true
+        description: Application id returned by `POST /v1/enrollments`.
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+              - context
+              - file
+              - document_type
+              properties:
+                context:
+                  $ref: '#/components/schemas/EnrollmentActionContext'
+                file:
+                  type: string
+                  format: binary
+                  description: The document file. Supported formats are PDF, JPEG, and PNG.
+                document_type:
+                  type: string
+                  enum:
+                  - sep
+                  description: Type of supporting document. Currently only `sep` is accepted.
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SupportingDocumentationRequest'
+            example:
+              context:
+                product: ichra
+                exchange: off_exchange
+              file:
+                filename: sep-proof.pdf
+                content_type: application/pdf
+                content_base64: JVBERi0xLjQg...
+              document_type: sep
+      responses:
+        '200':
+          $ref: '#/components/responses/SupportingDocumentationResponse'
+        '201':
+          $ref: '#/components/responses/SupportingDocumentationResponse'
+        '400':
+          $ref: '#/components/responses/EnrollmentError'
+        '401':
+          $ref: '#/components/responses/EnrollmentError'
+        '403':
+          $ref: '#/components/responses/EnrollmentError'
+        '404':
+          $ref: '#/components/responses/EnrollmentError'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
+        '422':
+          $ref: '#/components/responses/EnrollmentError'
+        '429':
+          $ref: '#/components/responses/EnrollmentError'
+        '500':
+          $ref: '#/components/responses/EnrollmentError'
+        '502':
+          $ref: '#/components/responses/BadGateway'
+        '503':
+          $ref: '#/components/responses/EnrollmentError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+  /v1/enrollments/{enrollment_id}:
+    get:
+      tags:
+      - Enrollments
+      summary: Fetch a direct enrollment application
+      description: 'Approval-gated direct enrollment API for reading an application. Send `product=ichra` and `exchange=off_exchange` as required query parameters so HealthSherpa ONE can validate the direct-enrollment routing channel. HealthSherpa ONE returns the application details for the supplied id. `product` and `exchange` are the only supported read query parameters; `include_events`, `plan_year`, and other read-time query parameters are not supported. The application plan year is returned in the response. Service failures (authorization failures, invalid routing context, and service-availability errors) are returned as a top-level `errors[]` array with `code`, `message`, and optional `field`. Edge-generated failures (API Gateway and WAF) instead use the unified `error` envelope: a missing or invalid API key returns `403 forbidden`, and gateway `502`/`504` also use that envelope. See the `EnrollmentError` response for both shapes.'
+      operationId: getEnrollment
+      parameters:
+      - name: enrollment_id
+        in: path
+        required: true
+        description: Application id returned by `POST /v1/enrollments`.
+        schema:
+          type: string
+      - name: product
+        in: query
+        required: true
+        description: Direct-enrollment product. Must be `ichra`.
+        schema:
+          type: string
+          enum:
+          - ichra
+      - name: exchange
+        in: query
+        required: true
+        description: Direct-enrollment routing channel. Must be `off_exchange`.
+        schema:
+          type: string
+          enum:
+          - off_exchange
+      responses:
+        '200':
+          $ref: '#/components/responses/EnrollmentResponse'
+        '400':
+          $ref: '#/components/responses/EnrollmentError'
+        '401':
+          $ref: '#/components/responses/EnrollmentError'
+        '403':
+          $ref: '#/components/responses/EnrollmentError'
+        '404':
+          $ref: '#/components/responses/EnrollmentError'
+        '429':
+          $ref: '#/components/responses/EnrollmentError'
+        '500':
+          $ref: '#/components/responses/EnrollmentError'
+        '502':
+          $ref: '#/components/responses/BadGateway'
+        '503':
+          $ref: '#/components/responses/EnrollmentError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+    put:
+      tags:
+      - Enrollments
+      summary: Update a direct enrollment application
+      description: 'Approval-gated direct enrollment API for updating an off-exchange application. Treat `PUT` as a full replacement-style update. Send the HealthSherpa ONE `context` object with `product = "ichra"`, `exchange = "off_exchange"`, and `plan_year` plus the full current application payload, including unchanged fields you want to preserve. When sending `applicants.primary`, include the full current primary applicant object because omitted primary fields may be cleared. Other products and exchanges are not supported here. HealthSherpa ONE maps `context.plan_year` to the application `plan_year`; `context` is not part of the stored application payload. Before submission, all application fields may be updated. After submission, carriers may restrict updates; check `supports_changes`, `can_change_plan`, and `can_report_change` on `GET /v1/enrollments/{enrollment_id}?product=ichra&exchange=off_exchange` before attempting post-enrollment changes. HealthSherpa ONE applies the agent and TPA identifiers (`_agent_id`, `tpa_slug`) from your approved account setup; caller-supplied `_agent_id`, `tpa_slug`, `actor.agent_id`, and `agent_of_record` are rejected.
+
+
+        Successful responses include the updated application data and current validation state. Service failures (authorization failures, invalid JSON bodies, validation errors, and service-availability errors) are returned as a top-level `errors[]` array with `code`, `message`, and optional `field`. Edge-generated failures (API Gateway and WAF) instead use the unified `error` envelope: a missing or invalid API key returns `403 forbidden`, and `413`, `415`, edge `429`, and gateway `502`/`504` also use that envelope. See the `EnrollmentError` response for both shapes.'
+      operationId: updateEnrollment
+      parameters:
+      - name: enrollment_id
+        in: path
+        required: true
+        description: Application id returned by `POST /v1/enrollments`.
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EnrollmentUpdateRequest'
+            example:
+              context:
+                product: ichra
+                exchange: off_exchange
+                plan_year: 2026
+              applicants:
+                primary:
+                  first_name: Jane
+                  last_name: Doe
+                  date_of_birth: '1990-01-01'
+                  gender: female
+                  us_citizen: true
+                  resides_in_state: true
+                  uses_tobacco: false
+                  language_spoken: english
+                  language_written: english
+                  email: jane.updated@example.com
+                  phone: '5559876543'
+                  signature: Jane Doe
+      responses:
+        '200':
+          $ref: '#/components/responses/EnrollmentResponse'
+        '400':
+          $ref: '#/components/responses/EnrollmentError'
+        '401':
+          $ref: '#/components/responses/EnrollmentError'
+        '403':
+          $ref: '#/components/responses/EnrollmentError'
+        '404':
+          $ref: '#/components/responses/EnrollmentError'
+        '409':
+          $ref: '#/components/responses/EnrollmentError'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
+        '422':
+          $ref: '#/components/responses/EnrollmentError'
+        '429':
+          $ref: '#/components/responses/EnrollmentError'
+        '500':
+          $ref: '#/components/responses/EnrollmentError'
+        '502':
+          $ref: '#/components/responses/BadGateway'
+        '503':
+          $ref: '#/components/responses/EnrollmentError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+components:
+  schemas:
+    Signatures:
+      type: object
+      additionalProperties: true
+      properties:
+        signature_date:
+          type: string
+          format: date
+          description: Date the application was signed. Required for submission. This is separate from `applicants.primary.signature`, the typed name.
+        pediatric_dental_signature:
+          type: string
+        pediatric_dental_signature_date:
+          type:
+          - string
+          - 'null'
+          format: date
+        translator_signature_date:
+          type:
+          - string
+          - 'null'
+          format: date
+        state_supplement_primary_signature:
+          type: string
+          description: State-required supplemental form signature for the primary applicant. Required for CO, UT, NJ.
+        state_supplement_spouse_signature:
+          type: string
+          description: State-required supplemental form signature for spouse. Required for UT.
+        state_supplement_disclosures_signature:
+          type: string
+          description: State-required supplemental form disclosures signature for the primary applicant. Required for CO.
+    EnrollmentResponse:
+      allOf:
+      - $ref: '#/components/schemas/ApplicationResponse'
+      description: Successful direct enrollment application response. Successful responses can contain `errors[]` as submission-readiness data; error responses are documented separately under the `EnrollmentError` response.
+    EnrollmentContext:
+      type: object
+      description: Routing context for direct enrollment create requests. Direct enrollment currently supports only `product = ichra` and `exchange = off_exchange`. Use `POST /v1/enrollment-sessions` for on-exchange enrollment.
+      additionalProperties: true
+      required:
+      - product
+      - exchange
+      - plan_year
+      properties:
+        product:
+          type: string
+          enum:
+          - ichra
+        exchange:
+          type: string
+          enum:
+          - off_exchange
+        coverage_family:
+          type: string
+          enum:
+          - medical
+        coverage_type:
+          type: string
+          enum:
+          - medical
+        plan_year:
+          type: integer
+          minimum: 2020
+          maximum: 2099
+    Applicants:
+      type: object
+      additionalProperties: true
+      required:
+      - primary
+      properties:
+        primary:
+          $ref: '#/components/schemas/PrimaryApplicant'
+        dependents:
+          type: array
+          items:
+            $ref: '#/components/schemas/Dependent'
+    PaymentInstructions:
+      type: object
+      description: Carrier-specific payment guidance.
+      additionalProperties: true
+      properties:
+        payment_required_with_submission:
+          type: boolean
+          description: '`true` when payment must be set before submission. Currently applies to Cigna and Elevance in-flow.'
+        payment_redirect_supported:
+          type: boolean
+          description: '`true` when the carrier supports browser-based payment redirect.'
+        pay_by_phone_supported:
+          type: boolean
+        payment_phone_number:
+          type:
+          - string
+          - 'null'
+    ApplicantBase:
+      type: object
+      additionalProperties: true
+      properties:
+        first_name:
+          type: string
+        middle_name:
+          type: string
+        last_name:
+          type: string
+        suffix:
+          type: string
+          enum:
+          - Jr.
+          - Sr.
+          - II
+          - III
+          - IV
+          - V
+        ssn:
+          type: string
+          description: 9 digits, no dashes. Encrypted at rest.
+        itin:
+          type: string
+          description: Individual Taxpayer Identification Number. Alternative to SSN.
+        date_of_birth:
+          type: string
+          format: date
+        gender:
+          type: string
+          enum:
+          - male
+          - female
+          - x
+          description: '`male` and `female` are accepted by all carriers. `x` is accepted for New York applicants; carriers in other states reject `x` at submission.'
+        married:
+          type: boolean
+        us_citizen:
+          type: boolean
+        resides_in_state:
+          type: boolean
+        uses_tobacco:
+          type: boolean
+          description: Tobacco use in the last 6 months.
+        tobacco_not_applicable:
+          type: boolean
+          description: Set to `true` if tobacco question is not applicable for this applicant.
+        race_ethnicity:
+          type: string
+          enum:
+          - white
+          - black_or_african_american
+          - american_indian_or_alaskan_native
+          - asian_indian
+          - chinese
+          - filipino
+          - japanese
+          - korean
+          - vietnamese
+          - native_hawaiian
+          - guamanian_or_chamorro
+          - samoan
+          - decline_to_answer
+          description: Required by some carriers. Use `decline_to_answer` if not collected.
+        hispanic_origin:
+          type: string
+          enum:
+          - 'yes'
+          - 'no'
+          - decline_to_answer
+          description: Required by some carriers. Use `decline_to_answer` if not collected.
+        hispanic_origin_description:
+          type: string
+          enum:
+          - cuban
+          - mexican_mexican_american_or_chicanx
+          - puerto_rican
+          - other_hispanic_latino_or_spanish_origin
+          - decline_to_answer
+          description: Required when `hispanic_origin` is `yes`.
+        language_spoken:
+          $ref: '#/components/schemas/ApplicantLanguage'
+        language_written:
+          $ref: '#/components/schemas/ApplicantLanguage'
+        external_id:
+          type: string
+          description: Your identifier for this member.
+        email:
+          type: string
+          format: email
+        phone:
+          type: string
+        full_time_student:
+          type: boolean
+        graduation_date:
+          type: string
+          format: date
+          description: Required if `full_time_student` is `true`.
+        marital_status:
+          type: string
+          description: Carrier-specific marital status. When provided, takes precedence over the `married` boolean.
+        has_disability:
+          type: boolean
+          description: Affects dependent age eligibility limits.
+        disability_is_temporary:
+          type: boolean
+          description: Whether the disability is temporary. Only accepted by carriers that require disability follow-up questions.
+        disability_end_date:
+          type: string
+          format: date
+          description: Expected end date of a temporary disability. Only accepted by carriers that require disability follow-up questions.
+        medicare_medicaid_eligible:
+          type: boolean
+          description: Whether the applicant is eligible for Medicare or Medicaid. Only accepted by carriers that require this field.
+        medicare_eligible:
+          type: boolean
+          description: Whether the applicant is eligible for Medicare.
+        enrolled_in_medicare:
+          type: boolean
+        enrolled_in_medicare_parts_a_or_b:
+          type: boolean
+        enrolled_in_medicaid_chip_or_other_gov_program:
+          type: boolean
+        veteran_or_active_duty_military:
+          type: boolean
+        currently_incarcerated:
+          type: boolean
+        has_eligible_immigration_status:
+          type: boolean
+        existing_coverage:
+          $ref: '#/components/schemas/ExistingCoverage'
+        add_to_donate_life_registry:
+          type: boolean
+          description: Whether the applicant wants to be added to the Donate Life registry. Only accepted by carriers that support this field.
+    Guardian:
+      type: object
+      description: Required for primary applicants under 18.
+      additionalProperties: true
+      properties:
+        first_name:
+          type: string
+        middle_name:
+          type: string
+        last_name:
+          type: string
+        suffix:
+          type: string
+          enum:
+          - Jr.
+          - Sr.
+          - II
+          - III
+          - IV
+          - V
+        gender:
+          type: string
+          enum:
+          - male
+          - female
+        relationship:
+          type: string
+          enum:
+          - parent
+          - legal_guardian
+          - grandparent
+          - other
+        date_of_birth:
+          type: string
+          format: date
+        relationship_other:
+          type: string
+          description: Required if `relationship` is `other`.
+        email:
+          type: string
+          format: email
+        home_phone:
+          type: string
+        alternate_phone:
+          type: string
+        mailing_address:
+          type: object
+          additionalProperties: true
+          description: Guardian's mailing address, if different from the applicant's residential address.
+          properties:
+            street_address_1:
+              type: string
+            street_address_2:
+              type: string
+            city:
+              type: string
+            state:
+              type: string
+            zip_code:
+              type: string
+            fips_code:
+              type: string
+    Analytics:
+      type: object
+      description: Optional tracking and attribution parameters.
+      additionalProperties: true
+      properties:
+        utm_source:
+          type: string
+        utm_medium:
+          type: string
+        utm_campaign:
+          type: string
+        utm_term:
+          type: string
+        utm_content:
+          type: string
+    EnrollmentRequest:
+      description: HealthSherpa ONE direct enrollment create request. Send the application payload at the request root and include the HealthSherpa ONE `context` object for routing. HealthSherpa ONE uses `context` only for routing and applies the agent and TPA identifiers (`_agent_id`, `tpa_slug`) from your approved account setup; caller-supplied `_agent_id`, `tpa_slug`, `actor.agent_id`, and `agent_of_record` are rejected.
+      allOf:
+      - $ref: '#/components/schemas/ApplicationCreateRequest'
+      - type: object
+        additionalProperties: true
+        required:
+        - context
+        properties:
+          context:
+            $ref: '#/components/schemas/EnrollmentContext'
+        not:
+          anyOf:
+          - required:
+            - agent_of_record
+          - required:
+            - _agent_id
+          - required:
+            - tpa_slug
+          - required:
+            - actor
+            properties:
+              actor:
+                type: object
+                required:
+                - agent_id
+    SupportingDocumentationRequest:
+      type: object
+      description: Supporting document upload request for SEP verification. JSON requests send base64-encoded file bytes; multipart requests send the binary file directly. HealthSherpa ONE validates `context` and processes only the documented upload fields.
+      required:
+      - context
+      - file
+      - document_type
+      properties:
+        context:
+          $ref: '#/components/schemas/EnrollmentActionContext'
+        file:
+          type: object
+          required:
+          - filename
+          - content_type
+          - content_base64
+          properties:
+            filename:
+              type: string
+              example: sep-proof.pdf
+            content_type:
+              type: string
+              enum:
+              - application/pdf
+              - image/jpeg
+              - image/png
+              description: MIME type of the uploaded file.
+              example: application/pdf
+            content_base64:
+              type: string
+              format: byte
+              description: Base64-encoded file bytes.
+              example: JVBERi0xLjQg...
+        document_type:
+          type: string
+          enum:
+          - sep
+          description: Type of supporting document. Currently only `sep` is accepted.
+    SpecialEnrollmentPeriod:
+      type: object
+      additionalProperties: true
+      properties:
+        event_type:
+          type: string
+          enum:
+          - birth
+          - adoption
+          - death
+          - divorce
+          - marriage
+          - domestic_partnership
+          - child_support
+          - loss_of_mec
+          - loss_of_dependent
+          - dependent_lost_coverage
+          - loss_of_pregnancy_coverage
+          - end_of_non_calendar_year_policy
+          - change_in_household_status
+          - lost_aptc
+          - relocation
+          - nj_county_change
+          - offered_ichra
+          - offered_qsehra
+          - mandated_covered_dependent
+          - released_from_incarceration
+          - returning_active_duty
+          - provider_not_participating_in_prior_plan
+          - issuer_violated_contract
+          - misinformed
+          - domestic_abuse
+          - family_care_app_ineligible
+          - pregnancy
+          - other
+          description: Standardized qualifying event type. HealthSherpa maps these to carrier-specific values automatically. `pregnancy` is accepted in CO, VA, NJ, and MD. For ICHRA enrollments, `offered_ichra` is the most common reason.
+        event_date:
+          type: string
+          format: date
+    SubmitResponse:
+      type: object
+      description: Response returned when an application submission is accepted. The object is additive and may include carrier-specific fields.
+      additionalProperties: true
+      properties:
+        application_id:
+          type: string
+          description: Application that was submitted.
+        external_id:
+          type: string
+          description: Partner-supplied external application id when available.
+        plan_year:
+          type: integer
+        plan_hios_id:
+          type: string
+        policy_status:
+          type: string
+          description: Status after accepting the submission. Submission processing may continue asynchronously; poll the application read endpoint for the final outcome.
+        payment_instructions:
+          $ref: '#/components/schemas/PaymentInstructions'
+        submitted_at:
+          type: string
+          format: date-time
+          description: When the application was submitted to the carrier.
+    PaymentRedirectResponse:
+      type: object
+      additionalProperties: true
+      required:
+      - application_id
+      - method
+      - endpoint
+      - fields
+      properties:
+        application_id:
+          type: string
+          description: Application id returned by `POST /v1/enrollments`.
+        method:
+          type: string
+          description: HTTP method to use. Always `POST`.
+          enum:
+          - POST
+        endpoint:
+          type: string
+          format: uri
+          description: The carrier payment URL. Submit the form POST to this URL.
+        fields:
+          type: array
+          description: Form fields to include as hidden inputs in the POST to `endpoint`. The fields vary by carrier payment integration. Include every returned field exactly as provided; do not filter, rename, or modify entries.
+          items:
+            type: object
+            required:
+            - name
+            - value
+            properties:
+              name:
+                type: string
+                description: The form field name.
+              value:
+                type: string
+                description: The form field value.
+    Attestations:
+      type: object
+      additionalProperties: true
+      properties:
+        agrees_issuer_attestations:
+          type: boolean
+        broker_signature_attestation:
+          type: boolean
+        electronic_signature_consent:
+          type: boolean
+        disclosure_statement_accepted:
+          type: boolean
+        coverage_replacement_attestation_accepted:
+          type: boolean
+        pediatric_dental:
+          type: string
+          enum:
+          - purchased_separately
+          - not_applicable
+          description: 'Pediatric dental attestation. `purchased_separately`: pediatric dental purchased via stand-alone dental plan. `not_applicable`: no children under 19 on the application.'
+        agent_submitted_application:
+          type: boolean
+        agent_provided_consumer_marketing_materials:
+          type: boolean
+        agent_advised_consumer_of_product_features:
+          type: boolean
+        agent_retained_signed_application_copy:
+          type: boolean
+        consumer_working_with_agent:
+          type: boolean
+        spouse_or_dependent_authorization:
+          type: boolean
+          description: Authorization for dependents/spouse to be included on the application.
+    NextAction:
+      type: object
+      description: State-aware action entry returned on successful enrollment application responses.
+      required:
+      - rel
+      - href
+      - method
+      additionalProperties: true
+      properties:
+        rel:
+          type: string
+          enum:
+          - self
+          - update
+          - validate
+          - submit
+          - cancel
+          - terminate
+          - payment_redirect
+          - upload_supporting_documentation
+          - change_plan
+          description: Relation type identifying the action.
+        href:
+          type: string
+          description: Relative HealthSherpa ONE URL for the action.
+        method:
+          type: string
+          enum:
+          - GET
+          - PUT
+          - POST
+          description: HTTP method to use.
+        required:
+          type: boolean
+          description: When true, this action must be completed before submission. Used for prerequisites like supporting documentation or payment.
+    SubmitRequest:
+      type: object
+      description: Routing context for direct enrollment submission. HealthSherpa ONE uses this context to validate the off-exchange direct-enrollment channel. `plan_year` is not required for submission.
+      additionalProperties: true
+      required:
+      - context
+      properties:
+        context:
+          type: object
+          additionalProperties: true
+          required:
+          - product
+          - exchange
+          properties:
+            product:
+              type: string
+              enum:
+              - ichra
+            exchange:
+              type: string
+              enum:
+              - off_exchange
+    SubmissionReadinessError:
+      type: object
+      description: Submission-readiness error entry. Appears in the `errors[]` array of a successful enrollment response to indicate what must be completed before the application can be submitted.
+      required:
+      - code
+      - message
+      properties:
+        code:
+          type: string
+          description: Machine-readable error code. Switch on this value instead of parsing `message`.
+          enum:
+          - unauthorized
+          - token_expired
+          - forbidden
+          - not_found
+          - plan_not_found
+          - plan_not_available
+          - missing_required_field
+          - invalid_field_value
+          - invalid_field_format
+          - internal_error
+          - rate_limit_exceeded
+          - payload_too_large
+          - duplicate_external_id
+          - latest_submission_failed
+          - supporting_documentation_required
+          - ineligible_for_enrollment
+        field:
+          type: string
+          description: Dot-path to the offending field when the error is tied to a request field.
+        message:
+          type: string
+          description: Human-readable description of the error. May change over time.
+    ApplicantLanguage:
+      type: string
+      enum:
+      - english
+      - spanish
+      - arabic
+      - chinese
+      - french_creole
+      - french
+      - german
+      - gujarati
+      - hindi
+      - korean
+      - polish
+      - portuguese
+      - russian
+      - tagalog
+      - urdu
+      - vietnamese
+      - other
+    Employer:
+      type: object
+      additionalProperties: true
+      properties:
+        name:
+          type: string
+        external_id:
+          type: string
+          description: Your identifier for this employer group.
+        phone:
+          type: string
+        fein:
+          type: string
+          description: 9-digit Federal Employer Identification Number.
+        address:
+          $ref: '#/components/schemas/Address'
+    ErrorResponse:
+      type: object
+      description: 'Canonical error envelope returned by HealthSherpa-owned API endpoint, infrastructure filter, and backend service failures. The direct enrollment endpoints return their own service failures using `EnrollmentErrorsResponse` (`errors[]`), but edge-generated failures on those endpoints (API Gateway and WAF, e.g. a missing or invalid API key) still use this `ErrorResponse` envelope. Clients should treat `error.code` as the stable programmatic identifier and surface `error.message` to humans. Recognized codes include:
+
+        - `unauthorized` (401) - backend runtime authentication failure when a request reaches a runtime that performs its own authentication
+
+        - `forbidden` (403) - missing/invalid/unauthorized API key at the API edge, or edge policy deny
+
+        - `invalid_request` (400) - request body or parameter validation failed
+
+        - `not_found` (404) - resource or route not found
+
+        - `payload_too_large` (413) - request body exceeded edge limits
+
+        - `unsupported_media_type` (415) - unsupported Content-Type
+
+        - `rate_limited` (429) - edge rate-limiting
+
+        - `service_unavailable` (503) - the edge is failing to reach the backend, or an upstream catalog/quoting/lookup service is unavailable
+
+        - `bad_gateway` (502) - the edge received an invalid response from the backend
+
+        - `gateway_timeout` (504) - the edge did not receive a timely response from the backend
+
+        - `internal_error` (500) - unexpected server error'
+      additionalProperties: true
+      required:
+      - error
+      properties:
+        error:
+          type: object
+          additionalProperties: true
+          required:
+          - code
+          - message
+          properties:
+            code:
+              type: string
+              description: Stable, machine-readable identifier for the error class (see ErrorResponse description for recognized values). Clients should branch on this field rather than on `message` or HTTP status alone.
+            message:
+              type: string
+              description: Human-readable explanation of the error, suitable for logging or surfacing to an end user.
+            details:
+              type: object
+              description: Optional per-field validation details. Keys are dotted/indexed paths (e.g. `household.applicants[0].age`) and values are arrays of full-sentence error messages.
+              additionalProperties:
+                type: array
+                items:
+                  type: string
+    CommunicationPreferences:
+      type: object
+      additionalProperties: true
+      properties:
+        application_notification_email:
+          type: boolean
+        application_notification_call:
+          type: boolean
+        application_notification_text:
+          type: boolean
+        email_contact_consent:
+          type: boolean
+        marketing_contact_consent:
+          type: boolean
+        decline_marketing_contact:
+          type: boolean
+        preferred_communication_method:
+          type: string
+          enum:
+          - email
+          - phone
+          - mail
+        agrees_hsa_contact_opt_in:
+          type: boolean
+        communication_preference_affirmed:
+          type: boolean
+          description: Whether the applicant has affirmed their communication preferences.
+    Dependent:
+      allOf:
+      - $ref: '#/components/schemas/ApplicantBase'
+      - type: object
+        required:
+        - first_name
+        - last_name
+        - date_of_birth
+        - gender
+        - relationship
+        properties:
+          gender:
+            type: string
+            enum:
+            - male
+            - female
+            description: Dependent applicant gender.
+          relationship:
+            type: string
+            enum:
+            - spouse
+            - domestic_partner
+            - child
+            - parent
+            - stepparent
+            - parent_in_law
+            - sibling
+            - other
+            description: '`spouse`, `domestic_partner`, and `child` are supported by all carriers. Other values are accepted by select carriers and states.'
+          alternate_address:
+            $ref: '#/components/schemas/AlternateAddress'
+          guardian:
+            $ref: '#/components/schemas/Guardian'
+    PolicyPaymentStatus:
+      type: object
+      description: Carrier-reported payment information. Fields are nullable because availability depends on carrier reporting.
+      additionalProperties: true
+      properties:
+        payment_status:
+          type:
+          - string
+          - 'null'
+        payment_status_updated_date:
+          type:
+          - string
+          - 'null'
+          format: date
+        grace_period_start_date:
+          type:
+          - string
+          - 'null'
+          format: date
+        paid_through_date:
+          type:
+          - string
+          - 'null'
+          format: date
+        past_due_member_responsibility_balance_due:
+          type:
+          - string
+          - 'null'
+        current_member_responsibility_balance_due:
+          type:
+          - string
+          - 'null'
+        autopay_indicator:
+          type:
+          - boolean
+          - 'null'
+    MailingAddress:
+      allOf:
+      - $ref: '#/components/schemas/Address'
+      - type: object
+        properties:
+          different_from_home_address:
+            type: boolean
+            default: false
+          billing_use_only:
+            type: boolean
+            default: false
+    EnrollmentErrorDetail:
+      type: object
+      description: Error entry returned in a direct enrollment failure body (`errors[]`). `code` is intentionally not a closed enum; the values below are the known set and may grow over time, so switch on `code` rather than parsing `message`. `field` is present for field-level validation errors.
+      required:
+      - code
+      - message
+      properties:
+        code:
+          type: string
+          description: 'Machine-readable error code. Known codes: `invalid_request` (400 request/JSON validation, server-owned or `agent_of_record` fields, unsupported `context.exchange`), `idempotency_key_required` (400 missing `Idempotency-Key`), `idempotency_key_invalid` (400 malformed `Idempotency-Key`), `idempotency_in_progress` (409 concurrent retry), `idempotency_mismatch` (422 same key, different body), `unauthorized` (401), `forbidden` (403 not authorized), `rate_limited` (429), `service_unavailable` (503), `internal_error` (500), `token_expired` (401), `not_found` (404), `plan_not_found`, `plan_not_available`, `missing_required_field`, `invalid_field_value`, `invalid_field_format`, `rate_limit_exceeded` (429), `payload_too_large` (413), `duplicate_external_id` (409), `latest_submission_failed`, `supporting_documentation_required`, `ineligible_for_enrollment`.'
+        field:
+          type: string
+          description: Dot-path to the offending request field (e.g. `context.exchange`, `_agent_id`, `plan_hios_id`). Present only for field-level errors; omitted for auth, idempotency, and service-level errors.
+        message:
+          type: string
+          description: Human-readable description of the error. May change over time.
+    EnrollmentUpdateRequest:
+      type: object
+      description: HealthSherpa ONE direct enrollment update request. Treat `PUT` as a full replacement-style update. Send the HealthSherpa ONE `context` object with `product = "ichra"`, `exchange = "off_exchange"`, and `plan_year` plus the full current application payload, including unchanged fields you want to preserve. When `applicants.primary` is present, include the full current primary applicant object because omitted primary fields may be cleared. HealthSherpa ONE maps `context.plan_year` to the application `plan_year`, applies `_agent_id` and `tpa_slug` from your account setup, and rejects caller-supplied `_agent_id`, `tpa_slug`, `actor.agent_id`, and `agent_of_record`.
+      additionalProperties: true
+      required:
+      - context
+      properties:
+        context:
+          $ref: '#/components/schemas/EnrollmentUpdateContext'
+        applicants:
+          $ref: '#/components/schemas/Applicants'
+          description: Applicant objects are replacement-shaped. When sending `applicants.primary`, include the full current primary applicant object; omitted primary fields may be cleared.
+      not:
+        anyOf:
+        - required:
+          - agent_of_record
+        - required:
+          - _agent_id
+        - required:
+          - tpa_slug
+        - required:
+          - actor
+          properties:
+            actor:
+              type: object
+              required:
+              - agent_id
+    EnrollmentErrorsResponse:
+      type: object
+      description: Error body used by the direct enrollment endpoints for service failures. Each error includes a machine-readable `code`, a human-readable `message`, and may include `field` when the error is tied to a request path.
+      additionalProperties: true
+      required:
+      - errors
+      properties:
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/EnrollmentErrorDetail'
+          minItems: 1
+    EnrollmentActionContext:
+      type: object
+      additionalProperties: true
+      required:
+      - product
+      - exchange
+      properties:
+        product:
+          type: string
+          enum:
+          - ichra
+        exchange:
+          type: string
+          enum:
+          - off_exchange
+    AlternateAddress:
+      type: object
+      description: Address for a dependent living at a different address than the primary applicant.
+      additionalProperties: true
+      properties:
+        street_address_1:
+          type: string
+        street_address_2:
+          type: string
+        city:
+          type: string
+        state:
+          type: string
+        zip_code:
+          type: string
+        fips_code:
+          type: string
+        reason:
+          type: string
+          description: Reason the dependent has a different address.
+    Translator:
+      type: object
+      description: Translator assisting the applicant. Required by some carriers when the applicant requires language assistance.
+      additionalProperties: true
+      properties:
+        first_name:
+          type: string
+        middle_name:
+          type: string
+        last_name:
+          type: string
+        reason:
+          type: string
+          description: Why a translator is needed.
+    SimpleAddress:
+      type: object
+      additionalProperties: true
+      properties:
+        street_address_1:
+          type: string
+        street_address_2:
+          type: string
+        city:
+          type: string
+        state:
+          type: string
+        zip_code:
+          type: string
+    PrimaryApplicant:
+      allOf:
+      - $ref: '#/components/schemas/ApplicantBase'
+      - type: object
+        required:
+        - first_name
+        - last_name
+        - date_of_birth
+        - gender
+        properties:
+          phone_type:
+            type: string
+            enum:
+            - home
+            - work
+            - cell
+          secondary_phone:
+            type: string
+            description: Secondary contact phone number.
+          guardian:
+            $ref: '#/components/schemas/Guardian'
+          responsible_party:
+            $ref: '#/components/schemas/ResponsibleParty'
+          translator:
+            $ref: '#/components/schemas/Translator'
+          signature:
+            type: string
+            description: Primary applicant's typed full legal name. Required for submission. This field is on the applicant object, not under the top-level `signatures` object.
+          children_live_with_primary:
+            type: boolean
+          has_pediatric_dental_coverage:
+            type: boolean
+          previously_applied:
+            type: boolean
+          previously_applied_member_id:
+            type: string
+          primary_requesting_coverage:
+            type: boolean
+            description: Whether the primary applicant is requesting coverage for themselves.
+    ApplicationListResponse:
+      type: object
+      description: Paginated list of direct enrollment applications.
+      additionalProperties: true
+      required:
+      - applications
+      - pagination
+      properties:
+        applications:
+          type: array
+          items:
+            $ref: '#/components/schemas/ApplicationListItem'
+        pagination:
+          $ref: '#/components/schemas/ApplicationListPagination'
+    ResponsibleParty:
+      type: object
+      description: Responsible party for a minor applicant, when someone other than the guardian is financially responsible. Required by Security Health, Sanford, Oscar, and UHC.
+      additionalProperties: true
+      properties:
+        first_name:
+          type: string
+        middle_name:
+          type: string
+        last_name:
+          type: string
+        date_of_birth:
+          type: string
+          format: date
+        sex:
+          type: string
+          enum:
+          - male
+          - female
+        relationship:
+          type: string
+          enum:
+          - parent_guardian
+          - sibling
+        phone:
+          type: string
+        street_address_1:
+          type: string
+        street_address_2:
+          type: string
+        city:
+          type: string
+        state:
+          type: string
+        zip_code:
+          type: string
+    ApplicationResponse:
+      type: object
+      additionalProperties: true
+      properties:
+        application_id:
+          type: string
+        external_id:
+          type: string
+        tpa_slug:
+          type: string
+        policy_status:
+          type: string
+          enum:
+          - draft
+          - pending_effectuation
+          - effectuated
+          - submission_failed
+          - cancelled
+          - terminated
+          description: '`draft` when the application has not yet been submitted. Transitions to `pending_effectuation` on successful submission. `submission_failed` means asynchronous carrier submission failed after submit returned.'
+        document_status:
+          type:
+          - string
+          - 'null'
+          enum:
+          - none_needed
+          - required
+          - uploaded
+          - verified
+          - denied
+          - null
+          description: SEP document verification status. `required` means documentation must be uploaded; `uploaded` means sent to carrier pending verification; `verified` means accepted; `denied` means carrier denied the documentation.
+        sep_reason:
+          type:
+          - string
+          - 'null'
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+        submitted_at:
+          type:
+          - string
+          - 'null'
+          format: date-time
+        desired_effective_date:
+          type: string
+          format: date
+        plan_hios_id:
+          type: string
+        plan_year:
+          type: integer
+        issuer_hios_id:
+          type: string
+        payment_instructions:
+          $ref: '#/components/schemas/PaymentInstructions'
+        payment:
+          anyOf:
+          - $ref: '#/components/schemas/PolicyPaymentStatus'
+          - type: 'null'
+          description: Carrier-reported payment status. Only present after submission; redirect carriers may not report it immediately.
+        policies:
+          type: array
+          items:
+            $ref: '#/components/schemas/PolicyDetail'
+        application:
+          type: object
+          additionalProperties: true
+          description: Echo of the application data as stored.
+        supports_changes:
+          type: boolean
+          description: Whether the carrier supports post-enrollment changes for this application. Only present on submitted applications.
+        can_change_plan:
+          type: boolean
+          description: Whether a plan change is currently allowed. Only present on submitted applications.
+        can_report_change:
+          type: boolean
+          description: Whether demographic changes can be reported. Only present on submitted applications.
+        errors:
+          type: array
+          description: Submission-readiness errors. Present on every successful POST, PUT, and GET response. Empty means the application is ready to submit. Each entry has `code`, `message`, and optional `field`.
+          items:
+            $ref: '#/components/schemas/SubmissionReadinessError'
+        next_actions:
+          type: array
+          description: State-aware actions the partner can currently take. HealthSherpa ONE generates `href` and `method` from `rel` so links point at public `/v1/enrollments` routes. POST and PUT actions still require the request bodies documented for those endpoints.
+          items:
+            $ref: '#/components/schemas/NextAction'
+        events:
+          type: array
+          description: Audit timeline of the application lifecycle when available, ordered newest-first.
+          items:
+            $ref: '#/components/schemas/ApplicationEvent'
+    EnrollmentActionContextRequest:
+      type: object
+      description: Routing context for direct enrollment action endpoints.
+      additionalProperties: true
+      required:
+      - context
+      properties:
+        context:
+          $ref: '#/components/schemas/EnrollmentActionContext'
+    StatusChangeResponse:
+      type: object
+      description: Response returned for an accepted application cancellation or termination status change.
+      additionalProperties: true
+      required:
+      - application_id
+      - policy_status
+      - updated_at
+      properties:
+        application_id:
+          type: string
+          description: Application whose policy status changed.
+        policy_status:
+          type: string
+          description: Updated policy status.
+        effective_date:
+          type:
+          - string
+          - 'null'
+          format: date
+          description: The effective date of the status change when present.
+        updated_at:
+          type: string
+          format: date-time
+          description: When the status-change request updated the application.
+    Address:
+      type: object
+      additionalProperties: true
+      required:
+      - street_address_1
+      - city
+      - state
+      - zip_code
+      properties:
+        street_address_1:
+          type: string
+        street_address_2:
+          type: string
+        city:
+          type: string
+        state:
+          type: string
+          description: Two-letter state code.
+        zip_code:
+          type: string
+          pattern: ^\d{5}$
+        fips_code:
+          type: string
+          description: 5-digit FIPS county code.
+    AgentOfRecord:
+      type: object
+      description: Agent-of-record payload. HealthSherpa ONE does not accept caller-supplied agent-of-record data on `POST /v1/enrollments`; attribution is derived from your approved account setup.
+      additionalProperties: true
+      properties:
+        first_name:
+          type: string
+        last_name:
+          type: string
+        national_producer_number:
+          type: string
+          description: 1-10 digits, must not start with 0.
+        carrier_producer_code:
+          type: string
+          description: Carrier-specific agent identifier. For Elevance, this is the 10-character uppercase string they generate, ending in Y or Z.
+        state_license_number:
+          type: string
+        email:
+          type: string
+          format: email
+        phone:
+          type: string
+        fax_number:
+          type: string
+        address:
+          $ref: '#/components/schemas/SimpleAddress'
+        signature:
+          type: string
+    ApplicationEvent:
+      type: object
+      required:
+      - type
+      - occurred_at
+      additionalProperties: true
+      properties:
+        type:
+          type: string
+          enum:
+          - submitted
+          - changed
+          - document_status_changed
+          - cancelled
+          - submission_failed
+          - policy_status_updated
+        occurred_at:
+          type: string
+          format: date-time
+        target:
+          type: string
+          enum:
+          - application
+          - applicant
+          description: 'For `changed` events: whether the change was on the application or an applicant record.'
+        member_id:
+          type: string
+          description: 'For applicant change events: member id of the affected applicant.'
+        changes:
+          type: array
+          description: Field-level changes. Sensitive fields such as SSN and ITIN are redacted.
+          items:
+            type: object
+            properties:
+              field:
+                type: string
+              from:
+                type:
+                - string
+                - 'null'
+              to:
+                type:
+                - string
+                - 'null'
+        response_code:
+          type: string
+        carrier_id:
+          type: string
+        old_status:
+          type: string
+        new_status:
+          type: string
+        policy_id:
+          type: string
+        effective_date:
+          type: string
+          format: date
+        message:
+          type: string
+    HRA:
+      type: object
+      description: Health Reimbursement Arrangement details. Applies to the primary applicant, the employee receiving the HRA offer. If the ICHRA is affordable, all household members are ineligible for premium tax credits.
+      additionalProperties: true
+      properties:
+        offered_hra:
+          type:
+          - boolean
+          - 'null'
+          description: '`true`: applicant is offered an HRA. `false`: applicant is not offered an HRA. `null`: unknown.'
+        type:
+          type: string
+          enum:
+          - ichra
+          - qsehra
+        amount:
+          type: number
+          format: float
+          description: Monthly contribution in USD.
+        contribution_covers:
+          type: string
+          enum:
+          - premium
+          - premium_oop
+          description: '`premium`: premiums only. `premium_oop`: premiums and out-of-pocket costs.'
+        used_for_spousal_or_family_premiums:
+          type: string
+          enum:
+          - 'true'
+          - 'false'
+          - unknown
+          description: Whether the HRA is used for spousal or family premiums. Relevant for QSEHRA 834 indicators.
+        start:
+          type: string
+          format: date
+        employer:
+          $ref: '#/components/schemas/Employer'
+        premium_payer:
+          type: string
+        household_size:
+          type: integer
+        annual_household_income:
+          type: number
+          format: float
+        annual_household_income_determination:
+          type: string
+    SupportingDocumentationResponse:
+      type: object
+      additionalProperties: true
+      properties:
+        document_id:
+          type: string
+          description: Identifier assigned to the uploaded document.
+        application_id:
+          type: string
+          description: Application this document is attached to.
+        filename:
+          type: string
+        document_type:
+          type: string
+          description: Type of supporting document.
+        uploaded_at:
+          type: string
+          format: date-time
+          description: When the document was received.
+    ExistingCoverage:
+      type: object
+      additionalProperties: true
+      properties:
+        has_existing_coverage:
+          type: boolean
+        plan_replaces_existing_coverage:
+          type: boolean
+        type:
+          type: string
+          enum:
+          - issuer
+          - government
+          description: '`issuer`: coverage with another issuer. `government`: government program such as Medicare or Medicaid.'
+        insurer:
+          type: string
+        policy_id:
+          type: string
+        policyholder_name:
+          type: string
+        start_date:
+          type: string
+          format: date
+        term_date:
+          type: string
+          format: date
+        will_continue:
+          type: boolean
+          description: Whether the existing coverage will continue alongside the new plan.
+    ApplicationCreateRequest:
+      type: object
+      description: Canonical application schema accepted by `POST /v1/enrollments` alongside the HealthSherpa ONE `context` object. HealthSherpa ONE derives the application `plan_year` from `context.plan_year`; do not send a root `plan_year` in requests. Carrier-specific submission-readiness requirements are returned in the successful response `errors[]` array. HealthSherpa ONE applies `_agent_id` and `tpa_slug` from your account setup and rejects caller-supplied `_agent_id`, `tpa_slug`, `actor.agent_id`, and `agent_of_record`.
+      additionalProperties: true
+      required:
+      - plan_hios_id
+      - applicants
+      - residential_address
+      properties:
+        external_id:
+          type: string
+          description: Your unique identifier for this application. When omitted, HealthSherpa ONE defaults it to the request's `Idempotency-Key`.
+        _agent_id:
+          type:
+          - string
+          - 'null'
+          description: Server-owned HealthSherpa agent identifier. Do not send this field; caller-supplied values return `400 invalid_request`.
+        tpa_slug:
+          type: string
+          description: Server-owned HealthSherpa TPA identifier. Do not send this field; caller-supplied values return `400 invalid_request`.
+        agent_of_record:
+          $ref: '#/components/schemas/AgentOfRecord'
+          deprecated: true
+          description: Not accepted by HealthSherpa ONE. The connected HealthSherpa agent is the agent of record; caller-supplied `agent_of_record` returns `400 invalid_request`.
+        plan_hios_id:
+          type: string
+          description: 14-character HIOS plan ID.
+        plan_year:
+          type: integer
+          description: Plan year for the application. Omit this root field; HealthSherpa ONE sets it from `context.plan_year`.
+        desired_effective_date:
+          type: string
+          format: date
+          description: Optional. When omitted, the carrier auto-determines the effective date based on the SEP type and event date. When provided, the date must be valid for the SEP reason and event date. Invalid dates return `422` with valid choices when available, or a message that effective-date selection is unavailable. There is no endpoint to query valid dates ahead of time.
+        applicants:
+          $ref: '#/components/schemas/Applicants'
+        residential_address:
+          $ref: '#/components/schemas/Address'
+        mailing_address:
+          $ref: '#/components/schemas/MailingAddress'
+        hra:
+          $ref: '#/components/schemas/HRA'
+        special_enrollment_period:
+          $ref: '#/components/schemas/SpecialEnrollmentPeriod'
+        attestations:
+          $ref: '#/components/schemas/Attestations'
+        signatures:
+          $ref: '#/components/schemas/Signatures'
+        communication_preferences:
+          $ref: '#/components/schemas/CommunicationPreferences'
+        american_indian_or_alaskan_native_in_household:
+          type: boolean
+        analytics:
+          $ref: '#/components/schemas/Analytics'
+    ApplicationListPagination:
+      type: object
+      description: Pagination metadata for application list responses.
+      additionalProperties: true
+      required:
+      - limit
+      - offset
+      - total
+      properties:
+        limit:
+          type: integer
+        offset:
+          type: integer
+        total:
+          type: integer
+    PolicyDetail:
+      type: object
+      additionalProperties: true
+      properties:
+        policy_id:
+          type: string
+        effective_date:
+          type: string
+          format: date
+        expiration_date:
+          type: string
+          format: date
+        status:
+          type: string
+          enum:
+          - pending_effectuation
+          - effectuated
+          - cancelled
+          - terminated
+        plan_hios_id:
+          type: string
+        gross_premium:
+          type: number
+          format: float
+        members:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+            properties:
+              member_id:
+                type: string
+              effective_date:
+                type: string
+                format: date
+              removed_date:
+                type:
+                - string
+                - 'null'
+                format: date
+        agent_of_record:
+          type: object
+          additionalProperties: true
+          properties:
+            npn:
+              type: string
+            first_name:
+              type: string
+            last_name:
+              type: string
+            state_license_number:
+              type: string
+            email:
+              type: string
+        payment:
+          $ref: '#/components/schemas/PolicyPaymentStatus'
+    ApplicationListItem:
+      type: object
+      description: Summary application row returned by `GET /v1/enrollments`.
+      additionalProperties: true
+      properties:
+        application_id:
+          type: string
+        external_id:
+          type: string
+        employer_external_id:
+          type: string
+        plan_year:
+          type: string
+          description: Application plan year.
+        plan_hios_id:
+          type: string
+        exchange_type:
+          type: string
+        policy_status:
+          type: string
+          enum:
+          - draft
+          - pending_effectuation
+          - effectuated
+          - submission_failed
+          - cancelled
+          - terminated
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+    EnrollmentUpdateContext:
+      type: object
+      description: Routing context for direct enrollment updates. Send `product = ichra`, `exchange = off_exchange`, and `plan_year`; `plan_year` is mapped to the application plan year.
+      additionalProperties: true
+      required:
+      - product
+      - exchange
+      - plan_year
+      properties:
+        product:
+          type: string
+          enum:
+          - ichra
+        exchange:
+          type: string
+          enum:
+          - off_exchange
+        plan_year:
+          type: integer
+          minimum: 2020
+          maximum: 2099
+  responses:
+    EnrollmentListResponse:
+      description: Paginated direct enrollment application list.
+      headers:
+        X-Request-Id:
+          description: HealthSherpa ONE request id for tracing and support.
+          schema:
+            type: string
+        Retry-After:
+          description: Returned when a retry window is available.
+          schema:
+            type: string
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApplicationListResponse'
+          example:
+            applications:
+            - application_id: HSA000000001
+              external_id: crm-application-123
+              employer_external_id: employer-456
+              plan_year: '2026'
+              plan_hios_id: 12345CO1234501
+              exchange_type: off_exchange
+              policy_status: effectuated
+              created_at: '2026-01-02T10:00:00Z'
+              updated_at: '2026-01-03T10:00:00Z'
+            pagination:
+              limit: 25
+              offset: 0
+              total: 1
+    GatewayTimeout:
+      description: The API edge did not receive a timely response from the backend.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error:
+              code: gateway_timeout
+              message: The API edge did not receive a timely response from the backend. Please try again later.
+    EnrollmentStatusChangeResponse:
+      description: Application status-change request accepted.
+      headers:
+        X-Request-Id:
+          description: HealthSherpa ONE request id for tracing and support.
+          schema:
+            type: string
+        Retry-After:
+          description: Returned when a retry window is available.
+          schema:
+            type: string
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/StatusChangeResponse'
+          example:
+            application_id: HSA000000001
+            policy_status: cancelled
+            effective_date: '2026-02-01'
+            updated_at: '2026-01-14T16:10:00Z'
+    EnrollmentResponse:
+      description: Successful direct enrollment application response. The response object is additive and may include carrier-specific fields.
+      headers:
+        X-Request-Id:
+          description: HealthSherpa ONE request id for tracing and support.
+          schema:
+            type: string
+        Idempotent-Replay:
+          description: Present and set to `true` only when this response is being replayed from a prior call that supplied the same `Idempotency-Key` and request body.
+          schema:
+            type: string
+            enum:
+            - 'true'
+        Retry-After:
+          description: Returned when a retry window is available.
+          schema:
+            type: string
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/EnrollmentResponse'
+          example:
+            application_id: HSA000000001
+            external_id: crm-application-123
+            policy_status: draft
+            document_status: none_needed
+            plan_hios_id: 12345CO1234501
+            plan_year: 2026
+            payment_instructions:
+              payment_required_with_submission: false
+              payment_redirect_supported: true
+              pay_by_phone_supported: false
+              payment_phone_number: null
+            errors: []
+    UnsupportedMediaType:
+      description: The request `Content-Type` is not supported by the endpoint.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error:
+              code: unsupported_media_type
+              message: The request Content-Type is not supported by this endpoint.
+    SupportingDocumentationResponse:
+      description: Supporting document upload response.
+      headers:
+        X-Request-Id:
+          description: HealthSherpa ONE request id for tracing and support.
+          schema:
+            type: string
+        Retry-After:
+          description: Returned when a retry window is available.
+          schema:
+            type: string
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/SupportingDocumentationResponse'
+          example:
+            document_id: DOC000000001
+            application_id: HSA000000001
+            filename: sep-proof.pdf
+            document_type: sep_verification
+            uploaded_at: '2026-01-14T16:05:00Z'
+    EnrollmentError:
+      description: 'A direct enrollment error response. The body comes in one of two shapes depending on where the failure is generated:
+
+
+        - **Service failures** use the top-level `errors[]` shape (`EnrollmentErrorsResponse`). This covers request validation, idempotency-key handling, authorization, service availability, and application-level errors.
+
+        - **Edge-generated failures** (API Gateway and WAF, before the request reaches the service) use the unified `error` envelope (`ErrorResponse`). This is what you receive for a missing or invalid API key (`403 forbidden`), payload-size and media-type rejections (`413`, `415`), edge rate limiting (`429`), and gateway-level `5xx`.
+
+
+        Branch on the presence of `errors` vs `error`, and on the `code` value, rather than on HTTP status alone.'
+      headers:
+        X-Request-Id:
+          description: HealthSherpa ONE request id for tracing and support.
+          schema:
+            type: string
+        Retry-After:
+          description: Returned when a retry window is available.
+          schema:
+            type: string
+      content:
+        application/json:
+          schema:
+            anyOf:
+            - $ref: '#/components/schemas/EnrollmentErrorsResponse'
+            - $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            service_errors:
+              summary: Service failure (errors[])
+              value:
+                errors:
+                - code: plan_not_available
+                  field: plan_hios_id
+                  message: Plan is not available for the requested effective date
+            edge_error:
+              summary: Edge-generated failure (unified error envelope)
+              value:
+                error:
+                  code: forbidden
+                  message: The supplied API key is missing, invalid, or not authorized for this API.
+    SubmitEnrollmentResponse:
+      description: Application submission accepted. Processing can continue asynchronously; poll the application read endpoint for final policy status.
+      headers:
+        X-Request-Id:
+          description: HealthSherpa ONE request id for tracing and support.
+          schema:
+            type: string
+        Retry-After:
+          description: Returned when a retry window is available.
+          schema:
+            type: string
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/SubmitResponse'
+          example:
+            application_id: HSA000000001
+            external_id: crm-application-123
+            plan_year: 2026
+            plan_hios_id: 12345CO1234501
+            policy_status: pending_effectuation
+            payment_instructions:
+              payment_required_with_submission: false
+              payment_redirect_supported: true
+              pay_by_phone_supported: false
+              payment_phone_number: null
+            submitted_at: '2026-01-14T16:00:00Z'
+    BadGateway:
+      description: The API edge received an invalid response from the backend.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error:
+              code: bad_gateway
+              message: The API edge received an invalid response from the backend. Please try again later.
+    PayloadTooLarge:
+      description: The request body exceeded the maximum size accepted by the API edge.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error:
+              code: payload_too_large
+              message: The request payload exceeded the maximum allowed size.
+    PaymentRedirectResponse:
+      description: Payment redirect data returned. Render a browser form POST to `endpoint` with every returned `fields[]` entry as a hidden input.
+      headers:
+        X-Request-Id:
+          description: HealthSherpa ONE request id for tracing and support.
+          schema:
+            type: string
+        Retry-After:
+          description: Returned when a retry window is available.
+          schema:
+            type: string
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/PaymentRedirectResponse'
+          example:
+            application_id: HSA000000001
+            method: POST
+            endpoint: https://carrier.example.com/pay
+            fields:
+            - name: SAMLResponse
+              value: opaque-carrier-token
+            - name: RelayState
+              value: return-to-carrier
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: x-api-key

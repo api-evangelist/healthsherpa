@@ -1,0 +1,764 @@
+openapi: 3.1.0
+info:
+  title: HealthSherpa Public Enrollment Sessions Quotes API
+  version: 0.1.0
+  description: 'Machine-readable contract for the currently available public HealthSherpa endpoints: GET /v1/ping, GET /v1/reference/counties, GET /v1/reference/issuers, GET /v1/reference/providers, POST /v1/quotes, the approval-gated POST /v1/enrollment-sessions, and the approval-gated direct enrollment endpoints GET /v1/enrollments, POST /v1/enrollments, PUT /v1/enrollments/{enrollment_id}, GET /v1/enrollments/{enrollment_id}, POST /v1/enrollments/{enrollment_id}/cancellations, POST /v1/enrollments/{enrollment_id}/terminations, POST /v1/enrollments/{enrollment_id}/submissions, GET /v1/enrollments/{enrollment_id}/payment_redirect, and POST /v1/enrollments/{enrollment_id}/supporting_documentation. Object schemas remain additive and clients should ignore response fields they do not recognize.
+
+
+    Most HealthSherpa-owned errors follow the unified `ErrorResponse` schema: `{ "error": { "code": string, "message": string, "details"?: object } }`. The direct enrollment endpoints instead return service failures as a top-level `errors[]` array: `{ "errors": [ { "code": string, "message": string, "field"?: string } ] }`. Edge-generated failures (API Gateway and WAF, before a request reaches the service) always use the unified `ErrorResponse` envelope, including on the direct enrollment endpoints — most notably a missing or invalid API key (`403 forbidden`).'
+servers:
+- url: https://api.one.healthsherpa.com
+  description: Production
+security:
+- ApiKeyAuth: []
+tags:
+- name: Quotes
+paths:
+  /v1/quotes:
+    post:
+      tags:
+      - Quotes
+      summary: Search plans for one coverage type
+      description: Returns a homogeneous list of quote results for exactly one coverage_type. Send one request for one market and one coverage_type at a time.
+      operationId: createQuote
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QuoteRequest'
+            example:
+              context:
+                product: aca
+                exchange: on_exchange
+                coverage_family: medical
+                coverage_type: medical
+                plan_year: 2026
+              location:
+                zip_code: '30301'
+                fips_code: '13121'
+                state: GA
+              household:
+                household_size: 1
+                annual_income: 52000
+                effective_date: '2026-05-01'
+                applicants:
+                - member_id: applicant-1
+                  age: 40
+                  date_of_birth: '1986-05-01'
+                  relationship: primary
+                  uses_tobacco: false
+                  pregnant: false
+                  blind_or_disabled: false
+                  native_american: false
+              sort:
+                field: premium
+                direction: asc
+              page:
+                number: 1
+                size: 20
+      responses:
+        '200':
+          description: Quotes returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QuoteResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '502':
+          $ref: '#/components/responses/BadGateway'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+components:
+  schemas:
+    QuoteRequest:
+      type: object
+      additionalProperties: true
+      required:
+      - context
+      - location
+      - household
+      description: Canonical quote request for new integrations. Legacy `include` input is accepted for backward compatibility but ignored.
+      properties:
+        context:
+          $ref: '#/components/schemas/QuoteContext'
+        location:
+          $ref: '#/components/schemas/LocationInput'
+        household:
+          $ref: '#/components/schemas/HouseholdQuoteInput'
+        filters:
+          $ref: '#/components/schemas/QuoteFilters'
+        sort:
+          $ref: '#/components/schemas/SortInput'
+        page:
+          $ref: '#/components/schemas/PageInput'
+        include:
+          deprecated: true
+          description: Deprecated and ignored. Accepted for backward compatibility.
+    PageInput:
+      type: object
+      additionalProperties: true
+      properties:
+        number:
+          type: integer
+          minimum: 1
+          default: 1
+        size:
+          type: integer
+          minimum: 1
+          maximum: 500
+          default: 20
+    MedicalFilters:
+      type: object
+      additionalProperties: true
+      properties:
+        metal_levels:
+          type: array
+          items:
+            type: string
+            enum:
+            - bronze
+            - expanded_bronze
+            - silver
+            - gold
+            - platinum
+            - catastrophic
+        plan_types:
+          type: array
+          items:
+            type: string
+            enum:
+            - hmo
+            - ppo
+            - epo
+            - pos
+            - indemnity
+        hsa_eligible:
+          type: boolean
+        standardized_only:
+          type: boolean
+    ErrorResponse:
+      type: object
+      description: 'Canonical error envelope returned by HealthSherpa-owned API endpoint, infrastructure filter, and backend service failures. The direct enrollment endpoints return their own service failures using `EnrollmentErrorsResponse` (`errors[]`), but edge-generated failures on those endpoints (API Gateway and WAF, e.g. a missing or invalid API key) still use this `ErrorResponse` envelope. Clients should treat `error.code` as the stable programmatic identifier and surface `error.message` to humans. Recognized codes include:
+
+        - `unauthorized` (401) - backend runtime authentication failure when a request reaches a runtime that performs its own authentication
+
+        - `forbidden` (403) - missing/invalid/unauthorized API key at the API edge, or edge policy deny
+
+        - `invalid_request` (400) - request body or parameter validation failed
+
+        - `not_found` (404) - resource or route not found
+
+        - `payload_too_large` (413) - request body exceeded edge limits
+
+        - `unsupported_media_type` (415) - unsupported Content-Type
+
+        - `rate_limited` (429) - edge rate-limiting
+
+        - `service_unavailable` (503) - the edge is failing to reach the backend, or an upstream catalog/quoting/lookup service is unavailable
+
+        - `bad_gateway` (502) - the edge received an invalid response from the backend
+
+        - `gateway_timeout` (504) - the edge did not receive a timely response from the backend
+
+        - `internal_error` (500) - unexpected server error'
+      additionalProperties: true
+      required:
+      - error
+      properties:
+        error:
+          type: object
+          additionalProperties: true
+          required:
+          - code
+          - message
+          properties:
+            code:
+              type: string
+              description: Stable, machine-readable identifier for the error class (see ErrorResponse description for recognized values). Clients should branch on this field rather than on `message` or HTTP status alone.
+            message:
+              type: string
+              description: Human-readable explanation of the error, suitable for logging or surfacing to an end user.
+            details:
+              type: object
+              description: Optional per-field validation details. Keys are dotted/indexed paths (e.g. `household.applicants[0].age`) and values are arrays of full-sentence error messages.
+              additionalProperties:
+                type: array
+                items:
+                  type: string
+    SortInput:
+      type: object
+      additionalProperties: true
+      properties:
+        field:
+          type: string
+        direction:
+          type: string
+          enum:
+          - asc
+          - desc
+    QuoteResponseMeta:
+      type: object
+      additionalProperties: true
+      required:
+      - page_number
+      - page_size
+      - result_count
+      - warnings
+      properties:
+        page_number:
+          type: integer
+        page_size:
+          type: integer
+        result_count:
+          type: integer
+        warnings:
+          type: array
+          description: Non-fatal advisories for the request. Includes an include deprecation warning when legacy `include` is supplied.
+          items:
+            type: string
+    PlanQuoteResult:
+      type: object
+      additionalProperties: true
+      required:
+      - plan_id
+      - coverage_family
+      - coverage_type
+      - name
+      - api_enrollable
+      - context
+      - issuer
+      - pricing
+      - documents
+      - details
+      - release
+      properties:
+        plan_id:
+          type: string
+        variant_id:
+          type: string
+        external_plan_id:
+          type: string
+        coverage_family:
+          type: string
+        coverage_type:
+          type: string
+        name:
+          type: string
+        display_name:
+          type: string
+        api_enrollable:
+          type: boolean
+          description: Whether this quoted plan passes the known plan, carrier, and state pre-create gates for direct off-exchange API enrollment at quote time. `true` means the plan can be used with the direct off-exchange enrollment API. `false` means use quote/display only or another enrollment path. This is not consumer ACA eligibility and does not guarantee successful submission after applicant and carrier validation.
+        context:
+          type: object
+          additionalProperties: true
+          required:
+          - product
+          - exchange
+          - coverage_family
+          - coverage_type
+          properties:
+            product:
+              type: string
+              enum:
+              - aca
+              - ichra
+            exchange:
+              type: string
+              enum:
+              - on_exchange
+              - off_exchange
+            coverage_family:
+              type: string
+              enum:
+              - medical
+              - ancillary
+            coverage_type:
+              type: string
+              enum:
+              - medical
+              - dental
+              - vision
+              - supplemental_other
+            plan_year:
+              type: integer
+              minimum: 2020
+        issuer:
+          type: object
+          additionalProperties: true
+          required:
+          - issuer_id
+          - name
+          properties:
+            issuer_id:
+              type: string
+            name:
+              type: string
+            state:
+              type: string
+              nullable: true
+              pattern: ^[A-Z]{2}$
+              description: Two-letter US state code where the issuer is licensed.
+            payment_phone:
+              type: string
+              nullable: true
+              description: Phone number for member premium-payment inquiries.
+            customer_service_phone:
+              type: string
+              nullable: true
+              description: Phone number for general customer-service inquiries.
+        network:
+          type: object
+          additionalProperties: true
+          nullable: true
+          properties:
+            network_id:
+              type: string
+            name:
+              type: string
+            type:
+              type: string
+              nullable: true
+            network_url:
+              type: string
+              format: uri
+              nullable: true
+        pricing:
+          type: object
+          additionalProperties: true
+          required:
+          - gross_premium
+          - currency
+          properties:
+            gross_premium:
+              type: number
+            ehb_premium:
+              type: number
+            max_aptc:
+              type: number
+            subsidy_applied:
+              type: number
+            net_premium:
+              type: number
+            currency:
+              type: string
+              enum:
+              - USD
+            billing_period:
+              type: string
+              enum:
+              - monthly
+        documents:
+          type: object
+          additionalProperties: true
+          description: Canonical document slots. Carrier-specific source URLs are mapped into these stable fields.
+          properties:
+            sbc_url:
+              type: string
+              format: uri
+              nullable: true
+              description: Summary of Benefits and Coverage document URL.
+            formulary_url:
+              type: string
+              format: uri
+              nullable: true
+            brochure_url:
+              type: string
+              format: uri
+              nullable: true
+            network_url:
+              type: string
+              format: uri
+              nullable: true
+            payment_url:
+              type: string
+              format: uri
+              nullable: true
+              description: Issuer-hosted page for making a premium payment.
+        availability:
+          type: object
+          additionalProperties: true
+          description: Resolved geographic availability lineage produced after county-first location resolution.
+          properties:
+            state:
+              type: string
+              pattern: ^[A-Z]{2}$
+            service_area_id:
+              type: string
+              nullable: true
+            rating_area:
+              type: string
+              nullable: true
+        details:
+          type: object
+          additionalProperties: true
+          required:
+          - type
+          properties:
+            type:
+              type: string
+              enum:
+              - medical
+              - dental
+              - vision
+              - supplemental_other
+            metal_level:
+              type: string
+              description: Present for medical quote results.
+              enum:
+              - bronze
+              - expanded_bronze
+              - silver
+              - gold
+              - platinum
+              - catastrophic
+            plan_type:
+              type: string
+              description: Present for medical quote results.
+              enum:
+              - hmo
+              - ppo
+              - epo
+              - pos
+              - indemnity
+            hsa_eligible:
+              type: boolean
+              nullable: true
+              description: Present for medical quote results.
+            is_standardized:
+              type: boolean
+              nullable: true
+              description: Whether the plan follows a CMS- or state-defined standardized design. Present for medical quote results.
+            adult_dental:
+              type: boolean
+              nullable: true
+              description: Whether the medical plan embeds adult dental coverage. Present for medical quote results.
+            child_dental:
+              type: boolean
+              nullable: true
+              description: Whether the medical plan embeds pediatric (child) dental coverage. Present for medical quote results.
+            deductible_individual:
+              type: number
+              nullable: true
+              description: Individual annual deductible (USD). Present for medical quote results.
+            deductible_family:
+              type: number
+              nullable: true
+              description: Family annual deductible (USD). Present for medical quote results.
+            moop_individual:
+              type: number
+              nullable: true
+              description: Individual maximum out-of-pocket (USD). Present for medical quote results.
+            moop_family:
+              type: number
+              nullable: true
+              description: Family maximum out-of-pocket (USD). Present for medical quote results.
+            csr_level:
+              type: string
+              nullable: true
+              enum:
+              - off_exchange
+              - standard
+              - csr_zero_cost
+              - csr_limited
+              - csr73
+              - csr87
+              - csr94
+              - csr77
+              description: 'CMS CSR variation derived from the 2-digit HIOS variant suffix. Source: PlanAttributes PUF CSRVariationType.'
+            primary_care_summary:
+              type: string
+              nullable: true
+              description: Cost-share summary for a primary-care visit (e.g. "$25 Copay").
+            specialist_summary:
+              type: string
+              nullable: true
+              description: Cost-share summary for a specialist visit.
+            urgent_care_summary:
+              type: string
+              nullable: true
+              description: Cost-share summary for an urgent-care visit.
+            generic_rx_summary:
+              type: string
+              nullable: true
+              description: Cost-share summary for generic prescription drugs.
+        release:
+          type: object
+          additionalProperties: true
+          required:
+          - release_id
+          properties:
+            release_id:
+              type: string
+            plan_year:
+              type: integer
+    QuoteFilters:
+      type: object
+      additionalProperties: true
+      properties:
+        issuer_ids:
+          type: array
+          items:
+            type: string
+        premium_min:
+          type: number
+          minimum: 0
+        premium_max:
+          type: number
+          minimum: 0
+        effective_date:
+          type: string
+          format: date
+        network_types:
+          type: array
+          items:
+            type: string
+        medical:
+          $ref: '#/components/schemas/MedicalFilters'
+    QuoteContext:
+      type: object
+      additionalProperties: true
+      required:
+      - product
+      - exchange
+      - coverage_family
+      - coverage_type
+      properties:
+        product:
+          type: string
+          enum:
+          - aca
+          - ichra
+        exchange:
+          type: string
+          enum:
+          - on_exchange
+          - off_exchange
+        coverage_family:
+          type: string
+          enum:
+          - medical
+          - ancillary
+        coverage_type:
+          type: string
+          enum:
+          - medical
+          - dental
+          - vision
+          - supplemental_other
+        plan_year:
+          type: integer
+          minimum: 2020
+    LocationInput:
+      type: object
+      additionalProperties: true
+      required:
+      - zip_code
+      - fips_code
+      properties:
+        zip_code:
+          type: string
+          pattern: ^[0-9]{5}$
+        fips_code:
+          type: string
+          pattern: ^[0-9]{5}$
+        state:
+          type: string
+          pattern: ^[A-Z]{2}$
+          description: Quoteable state code for one of the 50 states or DC.
+    HouseholdQuoteInput:
+      type: object
+      additionalProperties: true
+      required:
+      - applicants
+      - household_size
+      properties:
+        applicants:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/ApplicantInput'
+        annual_income:
+          type: number
+          minimum: 0
+        household_size:
+          type: integer
+          minimum: 1
+        effective_date:
+          type: string
+          format: date
+    ApplicantInput:
+      type: object
+      additionalProperties: true
+      required:
+      - member_id
+      - age
+      - relationship
+      - uses_tobacco
+      properties:
+        member_id:
+          type: string
+          minLength: 1
+          description: Caller-supplied applicant identifier. Use a stable value from your system, such as `applicant-1`; this is not the applicant relationship. Send `relationship` separately as `primary`, `spouse`, or `dependent`.
+        age:
+          type: integer
+          minimum: 0
+        date_of_birth:
+          type: string
+          format: date
+        relationship:
+          type: string
+          enum:
+          - primary
+          - spouse
+          - dependent
+        uses_tobacco:
+          type: boolean
+        gender:
+          type: string
+          enum:
+          - female
+          - male
+          - other
+          - unknown
+          description: Optional applicant gender for quote flows that use gender in marketplace screening.
+        pregnant:
+          type: boolean
+        blind_or_disabled:
+          type: boolean
+        native_american:
+          type: boolean
+    QuoteResponse:
+      type: object
+      additionalProperties: true
+      required:
+      - plans
+      - meta
+      properties:
+        plans:
+          type: array
+          items:
+            $ref: '#/components/schemas/PlanQuoteResult'
+        meta:
+          $ref: '#/components/schemas/QuoteResponseMeta'
+  responses:
+    Forbidden:
+      description: The API key is missing, invalid, not authorized for this API, or the request was blocked at the API edge. Public API requests may receive this edge-generated response before the backend can return a runtime 401. When a request reaches the backend, 403 may also mean the developer account or integration is not in the state required for that operation. For `POST /v1/enrollment-sessions`, that operation documents its own flow-scoped 403 requirements (both flows require approved on-exchange enrollment access, plus `agent_assisted` OAuth link vs `self_service` deeplink agent ID) instead of using this shared response reference.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error:
+              code: forbidden
+              message: The supplied API key is missing, invalid, or not authorized for this API.
+    InternalError:
+      description: An unexpected error occurred.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error:
+              code: internal_error
+              message: An unexpected error occurred.
+    RateLimited:
+      description: Rate limit exceeded. Clients should back off and retry after the delay advertised in the Retry-After header.
+      headers:
+        Retry-After:
+          description: Number of seconds the client should wait before retrying.
+          schema:
+            type: integer
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error:
+              code: rate_limited
+              message: Request rate limit exceeded. Please slow down and retry shortly.
+    GatewayTimeout:
+      description: The API edge did not receive a timely response from the backend.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error:
+              code: gateway_timeout
+              message: The API edge did not receive a timely response from the backend. Please try again later.
+    UnsupportedMediaType:
+      description: The request `Content-Type` is not supported by the endpoint.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error:
+              code: unsupported_media_type
+              message: The request Content-Type is not supported by this endpoint.
+    ServiceUnavailable:
+      description: The API is temporarily unable to serve the request. This may be returned by the API edge when the backend is unhealthy, or by the backend when an upstream catalog, quoting, or lookup service is unavailable.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error:
+              code: service_unavailable
+              message: The service is temporarily unavailable. Please try again later.
+    BadGateway:
+      description: The API edge received an invalid response from the backend.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error:
+              code: bad_gateway
+              message: The API edge received an invalid response from the backend. Please try again later.
+    BadRequest:
+      description: 'Request validation failed. The response body''s `error.details` map contains per-field messages when the backend produced the error; edge-generated 400s omit `details`.
+
+
+        A malformed `Idempotency-Key` header is also rejected here with `code: idempotency_key_invalid`.'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error:
+              code: invalid_request
+              message: Validation failed.
+              details:
+                zip_code:
+                - ZIP code must be 5 digits
+    PayloadTooLarge:
+      description: The request body exceeded the maximum size accepted by the API edge.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error:
+              code: payload_too_large
+              message: The request payload exceeded the maximum allowed size.
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: x-api-key
