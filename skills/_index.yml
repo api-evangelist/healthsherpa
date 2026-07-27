@@ -1,0 +1,31 @@
+generated: '2026-07-19'
+method: searched
+description: >-
+  First-party HealthSherpa Agent Skills, saved verbatim. HealthSherpa publishes packaged Agent
+  Skills (agentskills.io standard) for its APIs; both are captured here rather than generated.
+skills:
+  - file: healthsherpa-ichra-platform/SKILL.md
+    name: ichra-platform-integration
+    description: >-
+      Build ICHRA platforms that integrate with HealthSherpa APIs for plan quoting, enrollment
+      (EnrollConnect and Deeplink), payment, policy lifecycle, and webhooks.
+    api: HealthSherpa ICHRA Partner API
+    source: https://github.com/healthsherpa/healthsherpa-ai-skills/tree/main/ichra_platform
+    method: searched
+    references:
+      - references/carrier-examples.md
+      - references/data-model.md
+      - references/deeplink-enrollment.md
+      - references/payment-and-documents.md
+      - references/quoting-and-plans.md
+      - references/webhooks-and-monitoring.md
+    evals: evals/evals.json
+  - file: healthsherpa-one-quote-builder.skill.md
+    name: healthsherpa-one-quote-builder
+    description: >-
+      Claude skill prompt to build a "HealthQuote Pro" full-stack ACA quote app on the ONE API
+      (county lookup, issuer lookup, POST /v1/quotes) with server-side x-api-key handling.
+    api: HealthSherpa Public API (ONE)
+    source: https://one.healthsherpa.com/prompts/claude-hs-one.skill
+    method: searched
+    grounded_operations: [listCounties, listIssuers, createQuote]

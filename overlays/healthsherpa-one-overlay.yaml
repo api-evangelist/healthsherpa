@@ -1,0 +1,17 @@
+overlay: 1.0.0
+info:
+  title: API Evangelist enhancements for HealthSherpa Public API (ONE)
+  version: 1.0.0
+extends: openapi/healthsherpa-one-openapi.json
+actions:
+  - target: $.info
+    update:
+      x-apievangelist-enriched: '2026-07-19'
+      x-apievangelist-provider: healthsherpa
+      x-apievangelist-auth: api-key (x-api-key header)
+      x-apievangelist-idempotency: 'Idempotency-Key header, 24h retention, on enrollment POSTs'
+      x-apievangelist-agent-skill: skills/healthsherpa-ichra-platform/SKILL.md
+  - target: $.info
+    update:
+      x-apievangelist-domain: ACA health insurance quoting and enrollment (CMS EDE)
+      x-apievangelist-error-format: healthsherpa-error-envelope (not rfc9457)

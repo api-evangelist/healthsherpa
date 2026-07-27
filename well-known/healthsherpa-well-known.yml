@@ -1,0 +1,26 @@
+generated: '2026-07-19'
+method: probed
+source: live probes of apis.yml + OpenAPI hosts
+note: >-
+  No genuine /.well-known/ discovery documents are published. The API host
+  (api.one.healthsherpa.com) returns 404 for all probed paths. The portal host
+  (one.healthsherpa.com) returns HTTP 200 for every path but the body is the SPA
+  HTML shell (a catch-all), not a valid well-known document — recorded as no-document.
+hosts:
+  - host: https://api.one.healthsherpa.com
+    documents:
+      - {path: /.well-known/security.txt, status: 404}
+      - {path: /.well-known/openid-configuration, status: 404}
+      - {path: /.well-known/oauth-authorization-server, status: 404}
+      - {path: /.well-known/api-catalog, status: 404}
+      - {path: /.well-known/ai-plugin.json, status: 404}
+  - host: https://one.healthsherpa.com
+    documents:
+      - {path: /.well-known/security.txt, status: 200, valid_document: false, note: SPA HTML fallback}
+      - {path: /.well-known/openid-configuration, status: 200, valid_document: false, note: SPA HTML fallback}
+      - {path: /.well-known/oauth-authorization-server, status: 200, valid_document: false, note: SPA HTML fallback}
+      - {path: /.well-known/api-catalog, status: 200, valid_document: false, note: SPA HTML fallback}
+      - {path: /.well-known/ai-plugin.json, status: 200, valid_document: false, note: SPA HTML fallback}
+  - host: https://www.healthsherpa.com
+    documents:
+      - {path: /.well-known/security.txt, status: 404}

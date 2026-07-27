@@ -1,0 +1,33 @@
+generated: '2026-07-19'
+method: searched
+source: https://one.healthsherpa.com/
+docs: https://one.healthsherpa.com/docs.html
+versioning:
+  scheme: uri-path
+  current: v1
+  spec_version: '0.1.0'
+  compatibility:
+    - Response objects are additive/open; clients ignore unrecognized fields.
+    - Clients must not rely on object property order.
+availability:
+  # Availability status per the developer portal capability list.
+  available_now:
+    - ACA On-Exchange Quoting API
+    - ACA Off-Exchange Quoting API
+    - On-Exchange Agent Enrollment Session
+  review_gated:
+    - On-Exchange Enrollment Session
+    - Off-Exchange Enrollment API (direct enrollment)
+  planned:
+    - Status API (Summer 2026)
+    - Ancillary API (coming soon)
+preview_notice: >-
+  HealthSherpa ONE is a developer preview provided "as is" without warranty. Review-gated
+  enrollment workflows are not generally available without HealthSherpa review/approval.
+deprecation:
+  policy_url: null
+  sunset_header: false
+  note: No formal deprecation/Sunset (RFC 8594) policy published for the ONE developer preview.
+status_page: null
+sla: null
+deprecated_operations: []

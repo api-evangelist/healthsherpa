@@ -1,0 +1,24 @@
+{
+  "provider": "healthsherpa",
+  "sources": [
+    "healthsherpa-enrollment-sessions-api-openapi.yml",
+    "healthsherpa-enrollments-api-openapi.yml",
+    "healthsherpa-quotes-api-openapi.yml",
+    "healthsherpa-reference-api-openapi.yml",
+    "healthsherpa-utility-api-openapi.yml"
+  ],
+  "outputs": [
+    "healthsherpa-enrollment-sessions-api-openapi.yml",
+    "healthsherpa-enrollments-api-openapi.yml",
+    "healthsherpa-quotes-api-openapi.yml",
+    "healthsherpa-reference-api-openapi.yml",
+    "healthsherpa-utility-api-openapi.yml"
+  ],
+  "archived": [],
+  "errors": [
+    "healthsherpa-enrollment-sessions-api-openapi.yml: dangling $ref: #/components/responses/Unauthorized"
+  ],
+  "warnings": [],
+  "notes": [],
+  "skipped": []
+}

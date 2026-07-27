@@ -1,0 +1,61 @@
+generated: '2026-07-19'
+method: derived
+source: openapi/healthsherpa-one-openapi.json
+docs: https://one.healthsherpa.com/docs.html
+format: healthsherpa-error-envelope
+envelope:
+  # Most HealthSherpa-owned + edge (API Gateway / WAF) failures use the unified `ErrorResponse`.
+  unified: '{ "error": { "code": string, "message": string, "details"?: object } }'
+  # Direct enrollment (/v1/enrollments*) service failures instead return a top-level errors[] array.
+  direct_enrollment: '{ "errors": [ { "code": string, "message": string, "field"?: string } ] }'
+  notes: >-
+    Not RFC 9457 (no application/problem+json). Clients should switch on error.code (or errors[].code),
+    treated as a stable programmatic identifier, and not parse `message`. Edge-generated failures on the
+    direct enrollment endpoints (missing/invalid API key) still use the unified `error` envelope.
+problems:
+  - status: 400
+    ref: BadRequest
+    title: Request validation failed
+    detail: "error.details maps offending fields to validation messages."
+  - status: 401
+    ref: Unauthorized
+    title: Authentication required or failed
+  - status: 403
+    ref: Forbidden
+    title: API key missing, invalid, or not authorized for this API/flow
+    detail: "Runtime 403 on enrollment-sessions is flow-scoped (agent_assisted vs self_service prerequisites)."
+  - status: 404
+    ref: NotFound
+    title: Resource not found
+  - status: 409
+    ref: IdempotencyInProgress
+    title: A prior request with the same Idempotency-Key is still processing
+  - status: 413
+    ref: PayloadTooLarge
+    title: Request body exceeded the maximum accepted size
+  - status: 415
+    ref: UnsupportedMediaType
+    title: Unsupported request Content-Type
+  - status: 422
+    ref: IdempotencyMismatch
+    title: Idempotency-Key reused within the 24-hour retention window with a different request
+  - status: 429
+    ref: RateLimited
+    title: Rate limit exceeded
+    detail: "Back off and retry after the delay indicated by the Retry-After header."
+  - status: 500
+    ref: InternalError
+    title: Unexpected server error
+  - status: 502
+    ref: BadGateway
+    title: API edge received an invalid response from the backend
+  - status: 503
+    ref: ServiceUnavailable
+    title: API temporarily unable to serve the request
+  - status: 504
+    ref: GatewayTimeout
+    title: API edge did not receive a timely backend response
+direct_enrollment_codes:
+  # From EnrollmentErrorDetail (errors[].code) — open set, may grow.
+  - code: invalid_request
+    meaning: Malformed or invalid direct enrollment request (may carry field)

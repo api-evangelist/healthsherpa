@@ -1,0 +1,92 @@
+generated: '2026-07-19'
+method: derived
+source: openapi/healthsherpa-one-openapi.json
+description: >-
+  Entity-relationship graph derived from OpenAPI component schema $ref links for the
+  HealthSherpa Public API (ONE). Quoting, enrollment-session, and direct-enrollment domains.
+entities:
+  - name: QuoteRequest
+    domain: quoting
+    contains: [LocationInput, HouseholdQuoteInput, QuoteContext, QuoteFilters, SortInput, PageInput]
+  - name: QuoteResponse
+    domain: quoting
+    contains: [PlanQuoteResult, QuoteResponseMeta]
+  - name: PlanQuoteResult
+    domain: quoting
+    key_fields: [api_enrollable, plan_hios_id]
+  - name: EnrollmentSessionRequest
+    domain: enrollment-session
+    contains: [EnrollmentSessionContext, EnrollmentSessionClient, EnrollmentSessionLocation, EnrollmentSessionHousehold, EnrollmentSessionEnrollment, EnrollmentSessionCampaign]
+  - name: EnrollmentSessionResponse
+    domain: enrollment-session
+    key_fields: [shopping_url, client_apply_url]
+  - name: ApplicationCreateRequest
+    domain: direct-enrollment
+    contains: [EnrollmentContext, PrimaryApplicant, Dependent, Address, HRA, Employer, SpecialEnrollmentPeriod, Attestations, Signatures]
+  - name: ApplicationResponse
+    domain: direct-enrollment
+    contains: [PolicyDetail, PaymentInstructions, PolicyPaymentStatus, NextAction, SubmissionReadinessError, ApplicationEvent]
+  - name: PolicyDetail
+    domain: direct-enrollment
+    contains: [PolicyPaymentStatus]
+  - name: ApplicationListResponse
+    domain: direct-enrollment
+    contains: [ApplicationListItem, ApplicationListPagination]
+relationships:
+  - from: QuoteRequest
+    to: HouseholdQuoteInput
+    kind: has_one
+    via: household
+  - from: QuoteRequest
+    to: LocationInput
+    kind: has_one
+    via: location
+  - from: QuoteResponse
+    to: PlanQuoteResult
+    kind: has_many
+    via: plans
+  - from: EnrollmentSessionRequest
+    to: EnrollmentSessionHousehold
+    kind: has_one
+    via: household
+  - from: ApplicationCreateRequest
+    to: PrimaryApplicant
+    kind: has_one
+    via: applicants.primary
+  - from: ApplicationCreateRequest
+    to: Dependent
+    kind: has_many
+    via: applicants.dependents
+  - from: ApplicationResponse
+    to: PolicyDetail
+    kind: has_many
+    via: policies
+  - from: ApplicationResponse
+    to: ApplicationEvent
+    kind: has_many
+    via: events
+  - from: ApplicationResponse
+    to: SubmissionReadinessError
+    kind: has_many
+    via: errors
+  - from: PolicyDetail
+    to: PolicyPaymentStatus
+    kind: has_one
+    via: payment_status
+  - from: ApplicationListResponse
+    to: ApplicationListItem
+    kind: has_many
+    via: applications
+identifiers:
+  - field: enrollment_id
+    scope: direct-enrollment application path id
+  - field: plan_hios_id
+    scope: QHP plan identifier (HIOS)
+  - field: hios_issuer_id
+    scope: QHP issuer identifier (HIOS)
+  - field: npi
+    scope: 10-digit provider NPI
+  - field: fips_code
+    scope: county FIPS code
+  - field: external_id
+    scope: caller-supplied application correlation id

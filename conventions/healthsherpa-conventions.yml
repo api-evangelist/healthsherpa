@@ -1,0 +1,54 @@
+generated: '2026-07-19'
+method: searched
+source: openapi/healthsherpa-one-openapi.json
+docs: https://one.healthsherpa.com/docs.html
+api: HealthSherpa Public API (ONE)
+base_url: https://api.one.healthsherpa.com
+authentication:
+  style: api-key
+  header: x-api-key
+  notes: >-
+    Single scheme (ApiKeyAuth). No OAuth, no sessions, no HMAC request signing on the ONE API.
+    Keys are issued at onboarding and revealed once in the passwordless portal. Server-side only.
+  ref: authentication/healthsherpa-authentication.yml
+idempotency:
+  supported: true
+  header: Idempotency-Key
+  scope: [POST /v1/enrollment-sessions, POST /v1/enrollments]
+  retention: 24h
+  behavior: >-
+    A previous request with the same Idempotency-Key still processing returns 409 (IdempotencyInProgress);
+    reusing a key within the 24h window with a different request body returns 422 (IdempotencyMismatch).
+pagination:
+  styles:
+    - style: limit-offset
+      applies_to: [GET /v1/enrollments]
+      params: [limit, offset]
+      response_fields: [pagination.limit, pagination.offset, pagination.total]
+    - style: page-number
+      applies_to: [GET /v1/reference/providers]
+      params: ["page[number]", "page[size]"]
+      response_fields: [meta]
+versioning:
+  scheme: uri-path
+  current: v1
+  compatibility:
+    - Response objects are open and may gain new optional fields.
+    - Clients must ignore unknown response properties.
+    - Clients must not rely on object property order.
+rate_limiting:
+  signaled: true
+  status: 429
+  retry_header: Retry-After
+  note: Numeric per-plan limits are not published in the spec; back off on 429 per Retry-After.
+error_envelope:
+  unified: '{ "error": { "code", "message", "details"? } }'
+  direct_enrollment: '{ "errors": [ { "code", "message", "field"? } ] }'
+  ref: errors/healthsherpa-problem-types.yml
+async_pattern:
+  note: >-
+    Enrollment submit / cancel / terminate return 202 Accepted and complete asynchronously;
+    clients poll readback (GET /v1/enrollments/{id}) until policy_status reflects the final outcome.
+media_types:
+  request: application/json (multipart/form-data for supporting documentation uploads)
+  response: application/json

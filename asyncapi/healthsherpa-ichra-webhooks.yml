@@ -1,0 +1,29 @@
+generated: '2026-07-19'
+method: searched
+source: https://docs.ichra.healthsherpa.com/api-reference/webhooks-api
+type: Webhooks
+api: HealthSherpa ICHRA Partner API
+description: >-
+  The ICHRA Partner API publishes two independently-subscribable webhook surfaces delivered as
+  HTTPS POST with Content-Type application/json. No published AsyncAPI document; captured here as a
+  webhook catalog. The public ONE API (api.one.healthsherpa.com) exposes no webhook surface of its own.
+transport: https-post
+webhooks:
+  - name: submission
+    surface: Submission Confirmation
+    trigger: An application submission from HealthSherpa to the Carrier or Exchange.
+  - name: sync
+    surface: Policy Status
+    trigger: A delivered or received status change to an existing application/policy with a Carrier.
+policy_status_values:
+  - pending_effectuation
+  - effectuated
+  - cancelled
+  - terminated
+  - unknown   # on-exchange only
+  - blank     # on-exchange only
+verification:
+  documented: false
+  note: Docs mention "a variety of authentication methods" but do not specify HMAC/signature verification.
+delivery:
+  retry_documented: false

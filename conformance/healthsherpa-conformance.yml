@@ -1,0 +1,38 @@
+generated: '2026-07-19'
+method: derived
+source: openapi/healthsherpa-one-openapi.json
+description: >-
+  Cross-cutting standards conformance for the HealthSherpa Public API (ONE), derived from the
+  OpenAPI contract and public docs. HealthSherpa is a CMS-approved ACA Enhanced Direct Enrollment
+  (EDE) platform; EDE/CMS conformance applies at the Marketplace-connection layer, not the public spec.
+standards:
+  - id: openapi-3.1
+    conforms: true
+    evidence: openapi.json declares openapi 3.1.0
+  - id: apikey-auth
+    conforms: true
+    evidence: components.securitySchemes ApiKeyAuth (apiKey, header x-api-key)
+  - id: oauth2
+    conforms: false
+    evidence: no oauth2 security scheme in the public ONE spec (Medicare Partner API v2 uses OAuth separately)
+  - id: rfc9457-problem-details
+    conforms: false
+    evidence: errors use a custom {error:{code,message,details}} envelope, not application/problem+json
+  - id: idempotency
+    conforms: true
+    evidence: Idempotency-Key header on POST /v1/enrollments and POST /v1/enrollment-sessions, 24h retention
+  - id: rate-limit-signaling
+    conforms: true
+    evidence: 429 responses with Retry-After
+  - id: pagination
+    conforms: true
+    evidence: limit/offset on /v1/enrollments; page[number]/page[size] on /v1/reference/providers
+  - id: webhooks
+    conforms: true
+    evidence: ICHRA Partner API publishes submission + sync webhooks (see asyncapi/)
+  - id: fhir
+    conforms: false
+    evidence: no FHIR resource shapes; domain is ACA quoting/enrollment, not clinical FHIR
+  - id: cms-ede
+    conforms: true
+    evidence: HealthSherpa is a CMS-approved Enhanced Direct Enrollment platform (documented publicly)

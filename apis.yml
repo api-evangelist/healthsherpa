@@ -1,8 +1,29 @@
 aid: healthsherpa
 name: HealthSherpa
-description: HealthSherpa is a company surfaced as a portfolio company of a16z, y-combinator and added
-  to the API Evangelist network as a stub for enrichment. This profile is a lead awaiting the enrichment
-  pipeline.
+description: >-
+  HealthSherpa is the leading ACA (Affordable Care Act) health insurance quoting and enrollment
+  platform, and was the first company to partner with CMS to offer Enhanced Direct Enrollment (EDE)
+  for agents. Its developer surface, HealthSherpa ONE (one.healthsherpa.com), exposes a public
+  OpenAPI 3.1 REST API for on- and off-exchange ACA plan quoting, county/issuer/provider reference
+  lookups, agent and self-service enrollment sessions, and an approval-gated direct enrollment API
+  covering the full off-exchange (ICHRA) application lifecycle — create, update, submit, cancel,
+  terminate, supporting-document upload, and payment redirect. Authentication is a single x-api-key
+  header; enrollment writes support Idempotency-Key with 24-hour retention. Separate ICHRA and
+  Medicare Partner APIs provide QuoteConnect/EnrollConnect, deeplinked enrollment, and webhooks.
+  HealthSherpa publishes first-party Agent Skills, an llms.txt, and vibe-coding prompts for agents.
+accessModel:
+  pricing: unknown
+  onboarding: self-serve
+  trial: false
+  try_now: false
+  public: false
+  label: Self-serve signup
+  confidence: medium
+  source:
+  - authentication
+  generated: '2026-07-22'
+  method: derived
+image: https://healthsherpa-21715791.hs-sites.com/hubfs/raw_assets/public/HealthSherpa%20Theme/HealthSherpa/images/favicon/apple-touch-icon.png
 url: https://raw.githubusercontent.com/api-evangelist/healthsherpa/refs/heads/main/apis.yml
 x-type: company
 x-source: vc-portfolio
@@ -13,12 +34,156 @@ x-tier: stub
 x-tier-reason: portfolio-lead
 specificationVersion: '0.20'
 created: '2026-07-17'
-modified: '2026-07-17'
+modified: '2026-07-19'
 tags:
 - Company
-apis: []
+- Health Insurance
+- Healthcare
+- ACA
+- Enrollment
+- Quoting
+- Insurance
+- Enhanced Direct Enrollment
+- ICHRA
+apis:
+- aid: healthsherpa:healthsherpa-enrollment-sessions-api
+  name: HealthSherpa Enrollment Sessions API
+  description: The Enrollment Sessions API from HealthSherpa — 1 operation(s) for enrollment sessions.
+  humanURL: https://one.healthsherpa.com/
+  baseURL: https://api.one.healthsherpa.com
+  tags:
+  - Enrollment Sessions
+  properties:
+  - type: OpenAPI
+    url: openapi/healthsherpa-enrollment-sessions-api-openapi.yml
+  - type: x-openapi-source
+    url: https://one.healthsherpa.com/openapi.json
+  - type: Documentation
+    url: https://one.healthsherpa.com/docs.html
+  - type: APIReference
+    url: https://one.healthsherpa.com/docs.html
+- aid: healthsherpa:healthsherpa-enrollments-api
+  name: HealthSherpa Enrollments API
+  description: The Enrollments API from HealthSherpa — 7 operation(s) for enrollments.
+  humanURL: https://one.healthsherpa.com/
+  baseURL: https://api.one.healthsherpa.com
+  tags:
+  - Enrollments
+  properties:
+  - type: OpenAPI
+    url: openapi/healthsherpa-enrollments-api-openapi.yml
+  - type: x-openapi-source
+    url: https://one.healthsherpa.com/openapi.json
+  - type: Documentation
+    url: https://one.healthsherpa.com/docs.html
+  - type: APIReference
+    url: https://one.healthsherpa.com/docs.html
+- aid: healthsherpa:healthsherpa-quotes-api
+  name: HealthSherpa Quotes API
+  description: The Quotes API from HealthSherpa — 1 operation(s) for quotes.
+  humanURL: https://one.healthsherpa.com/
+  baseURL: https://api.one.healthsherpa.com
+  tags:
+  - Quotes
+  properties:
+  - type: OpenAPI
+    url: openapi/healthsherpa-quotes-api-openapi.yml
+  - type: x-openapi-source
+    url: https://one.healthsherpa.com/openapi.json
+  - type: Documentation
+    url: https://one.healthsherpa.com/docs.html
+  - type: APIReference
+    url: https://one.healthsherpa.com/docs.html
+- aid: healthsherpa:healthsherpa-reference-api
+  name: HealthSherpa Reference API
+  description: The Reference API from HealthSherpa — 3 operation(s) for reference.
+  humanURL: https://one.healthsherpa.com/
+  baseURL: https://api.one.healthsherpa.com
+  tags:
+  - Reference
+  properties:
+  - type: OpenAPI
+    url: openapi/healthsherpa-reference-api-openapi.yml
+  - type: x-openapi-source
+    url: https://one.healthsherpa.com/openapi.json
+  - type: Documentation
+    url: https://one.healthsherpa.com/docs.html
+  - type: APIReference
+    url: https://one.healthsherpa.com/docs.html
+- aid: healthsherpa:healthsherpa-utility-api
+  name: HealthSherpa Utility API
+  description: The Utility API from HealthSherpa — 1 operation(s) for utility.
+  humanURL: https://one.healthsherpa.com/
+  baseURL: https://api.one.healthsherpa.com
+  tags:
+  - Utility
+  properties:
+  - type: OpenAPI
+    url: openapi/healthsherpa-utility-api-openapi.yml
+  - type: x-openapi-source
+    url: https://one.healthsherpa.com/openapi.json
+  - type: Documentation
+    url: https://one.healthsherpa.com/docs.html
+  - type: APIReference
+    url: https://one.healthsherpa.com/docs.html
+common:
+# --- Identity / link properties ---
+- type: DeveloperPortal
+  url: https://one.healthsherpa.com/
+- type: Documentation
+  url: https://one.healthsherpa.com/docs.html
+- type: APIReference
+  url: https://one.healthsherpa.com/docs.html
+- type: GettingStarted
+  url: https://one.healthsherpa.com/vibe-coders.html
+- type: SignUp
+  url: https://one.healthsherpa.com/register.html
+- type: Login
+  url: https://one.healthsherpa.com/portal.html
+- type: Support
+  url: mailto:developers@one.healthsherpa.com
+- type: Website
+  url: https://www.healthsherpa.com
+- type: GitHubOrganization
+  url: https://github.com/healthsherpa
+- type: LLMsTxt
+  url: llms/healthsherpa-llms.txt
+# --- Enriched artifacts (canonical scored pointers) ---
+- type: Authentication
+  url: authentication/healthsherpa-authentication.yml
+- type: Idempotency
+  url: conventions/healthsherpa-conventions.yml
+- type: Conventions
+  url: conventions/healthsherpa-conventions.yml
+- type: ErrorCatalog
+  url: errors/healthsherpa-problem-types.yml
+- type: Lifecycle
+  url: lifecycle/healthsherpa-lifecycle.yml
+- type: DataModel
+  url: data-model/healthsherpa-data-model.yml
+- type: Conformance
+  url: conformance/healthsherpa-conformance.yml
+- type: Compliance
+  url: https://www.healthsherpa.com/agents_agencies
+- type: MCPServer
+  url: mcp/healthsherpa-mcp.yml
+- type: Overlay
+  url: overlays/healthsherpa-one-overlay.yaml
+- type: Webhooks
+  url: asyncapi/healthsherpa-ichra-webhooks.yml
+- type: AgentSkill
+  url: skills/_index.yml
+- type: DomainSecurity
+  url: security/healthsherpa-domain-security.yml
+- type: AgenticAccess
+  url: agentic-access/healthsherpa-agentic-access.yml
 maintainers:
 - FN: Kin Lane
   email: kin@apievangelist.com
 - FN: APIs.json
   email: info@apis.io
+x-enrichment:
+  date: '2026-07-19'
+  status: backfilled
+  pass: local-v1
+  note: backfilled from .gitignore signal + verified work evidence

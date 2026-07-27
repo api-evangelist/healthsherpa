@@ -1,0 +1,57 @@
+generated: '2026-07-19'
+method: derived
+status: candidate
+source: openapi/healthsherpa-one-openapi.json
+note: No official hosted/remote MCP server found. Candidate tool list derived one-per-operation from the
+  ONE OpenAPI. The ICHRA docs' AI Agents & MCP guide covers GitBook doc-query params, not a hosted API
+  MCP server.
+server:
+  name: healthsherpa-one
+  transport: http
+  url: null
+tools:
+- name: ping
+  description: Confirm API reachability and key validity
+  source_operation: openapi/healthsherpa-one-openapi.json#ping
+- name: listCounties
+  description: List counties for a ZIP code
+  source_operation: openapi/healthsherpa-one-openapi.json#listCounties
+- name: listIssuers
+  description: List QHP issuers active in a state
+  source_operation: openapi/healthsherpa-one-openapi.json#listIssuers
+- name: searchProviders
+  description: Search healthcare providers by name near a ZIP code
+  source_operation: openapi/healthsherpa-one-openapi.json#searchProviders
+- name: createQuote
+  description: Search plans for one coverage type
+  source_operation: openapi/healthsherpa-one-openapi.json#createQuote
+- name: createEnrollmentSession
+  description: Start an enrollment session
+  source_operation: openapi/healthsherpa-one-openapi.json#createEnrollmentSession
+- name: listEnrollments
+  description: List direct enrollment applications
+  source_operation: openapi/healthsherpa-one-openapi.json#listEnrollments
+- name: createEnrollment
+  description: Create a direct enrollment application
+  source_operation: openapi/healthsherpa-one-openapi.json#createEnrollment
+- name: submitEnrollmentApplication
+  description: Submit a direct enrollment application
+  source_operation: openapi/healthsherpa-one-openapi.json#submitEnrollmentApplication
+- name: cancelEnrollmentApplication
+  description: Cancel a direct enrollment application
+  source_operation: openapi/healthsherpa-one-openapi.json#cancelEnrollmentApplication
+- name: terminateEnrollmentApplication
+  description: Terminate an active policy
+  source_operation: openapi/healthsherpa-one-openapi.json#terminateEnrollmentApplication
+- name: getEnrollmentPaymentRedirect
+  description: Get payment redirect data
+  source_operation: openapi/healthsherpa-one-openapi.json#getEnrollmentPaymentRedirect
+- name: uploadEnrollmentSupportingDocumentation
+  description: Upload supporting documentation
+  source_operation: openapi/healthsherpa-one-openapi.json#uploadEnrollmentSupportingDocumentation
+- name: getEnrollment
+  description: Fetch a direct enrollment application
+  source_operation: openapi/healthsherpa-one-openapi.json#getEnrollment
+- name: updateEnrollment
+  description: Update a direct enrollment application
+  source_operation: openapi/healthsherpa-one-openapi.json#updateEnrollment
