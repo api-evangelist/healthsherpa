@@ -1,0 +1,113 @@
+{
+  "opencollection": "1.0.0",
+  "info": {
+    "name": "HealthSherpa Public Enrollment Sessions Reference API",
+    "version": "0.1.0"
+  },
+  "request": {
+    "auth": {
+      "type": "apikey",
+      "key": "x-api-key",
+      "value": "{{x-api-key}}",
+      "placement": "header"
+    }
+  },
+  "items": [
+    {
+      "info": {
+        "name": "Reference",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "List counties for a ZIP code",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.one.healthsherpa.com/v1/reference/counties",
+            "params": [
+              {
+                "name": "zip_code",
+                "value": "",
+                "type": "query",
+                "description": "Five-digit ZIP code to resolve."
+              }
+            ]
+          },
+          "docs": "Returns the counties that overlap the supplied ZIP code. A ZIP code can cross state lines; each returned county's `state` is the canonical state for its `fips_code`. Use the selected fips_code in subsequent quote requests."
+        },
+        {
+          "info": {
+            "name": "List QHP issuers active in a state",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.one.healthsherpa.com/v1/reference/issuers",
+            "params": [
+              {
+                "name": "state",
+                "value": "FL",
+                "type": "query",
+                "description": "Two-letter uppercase US state code (e.g. `FL`). Lowercase values are rejected with `400 invalid_request` — clients must upcase before sending."
+              },
+              {
+                "name": "plan_year",
+                "value": "2026",
+                "type": "query",
+                "description": "ACA plan year to scope the issuer list to. Defaults to the current ACA plan year when omitted."
+              }
+            ]
+          },
+          "docs": "Returns the QHP issuers active in the requested state and plan year. Each entry combines a sortable display name (issuer marketing name when present, legal name otherwise) with the canonical 5-digit HIOS issuer ID for use in subsequent quote filters.\n\n**Plan year:** the optional `plan_year` query parameter pins the lookup to a specific year and defaults to the current ACA plan year (open enrollment for 2027 begins November 1 2026). Specify `plan_year` explicitly when reconciling enrollments from"
+        },
+        {
+          "info": {
+            "name": "Search healthcare providers by name near a ZIP code",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.one.healthsherpa.com/v1/reference/providers",
+            "params": [
+              {
+                "name": "query",
+                "value": "Smith",
+                "type": "query",
+                "description": "Provider or facility name search term."
+              },
+              {
+                "name": "zip_code",
+                "value": "85001",
+                "type": "query",
+                "description": "Five-digit ZIP code used for the geographic (near-ZIP) search."
+              },
+              {
+                "name": "exchange",
+                "value": "on_exchange",
+                "type": "query",
+                "description": "Marketplace channel to search. Required. One of `on_exchange` or `off_exchange`."
+              },
+              {
+                "name": "page[number]",
+                "value": "1",
+                "type": "query",
+                "description": "Page number (mirrors quoting's page.number). Defaults to 1; values below 1 are treated as 1."
+              },
+              {
+                "name": "page[size]",
+                "value": "50",
+                "type": "query",
+                "description": "Results per page (mirrors quoting's page.size), from 1 to 50. Defaults to 50; values outside this range resolve to 50."
+              }
+            ]
+          },
+          "docs": "Searches healthcare providers (individuals and facilities) by name near a ZIP code and returns paginated results with NPI and address data. This is a search-only endpoint; there is no \"list all providers\" mode.\n\nUse the returned 10-digit `npi` values when building provider selections, for example the `providers` field on an enrollment session.\n\n**Channel:** the required `exchange` parameter selects the marketplace channel (`on_exchange` or `off_exchange`).\n\n**Pagination:** results are paginated "
+        }
+      ]
+    }
+  ],
+  "bundled": true
+}

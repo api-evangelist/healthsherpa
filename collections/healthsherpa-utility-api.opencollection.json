@@ -1,0 +1,37 @@
+{
+  "opencollection": "1.0.0",
+  "info": {
+    "name": "HealthSherpa Public Enrollment Sessions Utility API",
+    "version": "0.1.0"
+  },
+  "request": {
+    "auth": {
+      "type": "apikey",
+      "key": "x-api-key",
+      "value": "{{x-api-key}}",
+      "placement": "header"
+    }
+  },
+  "items": [
+    {
+      "info": {
+        "name": "Utility",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "Confirm API reachability and key validity",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.one.healthsherpa.com/v1/ping"
+          },
+          "docs": "Confirm API reachability and key validity"
+        }
+      ]
+    }
+  ],
+  "bundled": true
+}

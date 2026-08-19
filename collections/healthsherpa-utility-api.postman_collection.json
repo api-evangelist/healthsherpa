@@ -1,0 +1,396 @@
+{
+  "item": [
+    {
+      "id": "640454a2-0a88-4cd7-ac72-2f57320bfdea",
+      "name": "Utility",
+      "description": {
+        "content": "",
+        "type": "text/plain"
+      },
+      "item": [
+        {
+          "id": "2ec34e28-ad4d-4880-95b2-afc18df214ac",
+          "name": "Confirm API reachability and key validity",
+          "request": {
+            "name": "Confirm API reachability and key validity",
+            "description": {},
+            "url": {
+              "path": [
+                "v1",
+                "ping"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "GET",
+            "auth": null
+          },
+          "response": [
+            {
+              "id": "32194aae-880e-48f5-98f1-bc096a6b8b6f",
+              "name": "API request reached the partner API edge and the supplied API key was accepted.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v1",
+                    "ping"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"environment\": \"production\",\n  \"ok\": true\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "c97ff301-aab4-4de5-a62a-aa5f08a35494",
+              "name": "The API key is missing, invalid, not authorized for this API, or the request was blocked at the API edge. Public API requests may receive this edge-generated response before the backend can return a runtime 401. When a request reaches the backend, 403 may also mean the developer account or integration is not in the state required for that operation. For `POST /v1/enrollment-sessions`, that operation documents its own flow-scoped 403 requirements (both flows require approved on-exchange enrollment access, plus `agent_assisted` OAuth link vs `self_service` deeplink agent ID) instead of using this shared response reference.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v1",
+                    "ping"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Forbidden",
+              "code": 403,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"error\": {\n    \"code\": \"forbidden\",\n    \"message\": \"The supplied API key is missing, invalid, or not authorized for this API.\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "8cb49576-f603-4cca-a2c4-18a0419e00d8",
+              "name": "Rate limit exceeded. Clients should back off and retry after the delay advertised in the Retry-After header.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v1",
+                    "ping"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Too Many Requests",
+              "code": 429,
+              "header": [
+                {
+                  "disabled": false,
+                  "description": "Number of seconds the client should wait before retrying.",
+                  "key": "Retry-After",
+                  "value": "8723"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"error\": {\n    \"code\": \"rate_limited\",\n    \"message\": \"Request rate limit exceeded. Please slow down and retry shortly.\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "2c55f563-b4e2-425c-952d-6a17ef849da5",
+              "name": "An unexpected error occurred.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v1",
+                    "ping"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Internal Server Error",
+              "code": 500,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"error\": {\n    \"code\": \"internal_error\",\n    \"message\": \"An unexpected error occurred.\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "88164bd8-c9a7-4ad6-80ec-c39d57f2eb1b",
+              "name": "The API edge received an invalid response from the backend.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v1",
+                    "ping"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Bad Gateway",
+              "code": 502,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"error\": {\n    \"code\": \"bad_gateway\",\n    \"message\": \"The API edge received an invalid response from the backend. Please try again later.\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "9259deca-de8d-4b44-8c71-4e649a76ffa5",
+              "name": "The API is temporarily unable to serve the request. This may be returned by the API edge when the backend is unhealthy, or by the backend when an upstream catalog, quoting, or lookup service is unavailable.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v1",
+                    "ping"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Service Unavailable",
+              "code": 503,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"error\": {\n    \"code\": \"service_unavailable\",\n    \"message\": \"The service is temporarily unavailable. Please try again later.\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "568178f3-a7c8-4bb7-a840-a05cf0f8428a",
+              "name": "The API edge did not receive a timely response from the backend.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v1",
+                    "ping"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Gateway Timeout",
+              "code": 504,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"error\": {\n    \"code\": \"gateway_timeout\",\n    \"message\": \"The API edge did not receive a timely response from the backend. Please try again later.\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        }
+      ],
+      "event": []
+    }
+  ],
+  "event": [],
+  "variable": [
+    {
+      "type": "string",
+      "value": "https://api.one.healthsherpa.com",
+      "key": "baseUrl"
+    }
+  ],
+  "auth": {
+    "type": "apikey",
+    "apikey": [
+      {
+        "key": "key",
+        "value": "x-api-key"
+      },
+      {
+        "key": "value",
+        "value": "{{apiKey}}"
+      },
+      {
+        "key": "in",
+        "value": "header"
+      }
+    ]
+  },
+  "info": {
+    "_postman_id": "866f7a67-9412-4726-aa0e-108bb2e3b085",
+    "name": "HealthSherpa Public Enrollment Sessions Utility API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": {
+      "content": "Machine-readable contract for the currently available public HealthSherpa endpoints: GET /v1/ping, GET /v1/reference/counties, GET /v1/reference/issuers, GET /v1/reference/providers, POST /v1/quotes, the approval-gated POST /v1/enrollment-sessions, and the approval-gated direct enrollment endpoints GET /v1/enrollments, POST /v1/enrollments, PUT /v1/enrollments/{enrollment_id}, GET /v1/enrollments/{enrollment_id}, POST /v1/enrollments/{enrollment_id}/cancellations, POST /v1/enrollments/{enrollment_id}/terminations, POST /v1/enrollments/{enrollment_id}/submissions, GET /v1/enrollments/{enrollment_id}/payment_redirect, and POST /v1/enrollments/{enrollment_id}/supporting_documentation. Object schemas remain additive and clients should ignore response fields they do not recognize.\n\nMost HealthSherpa-owned errors follow the unified `ErrorResponse` schema: `{ \"error\": { \"code\": string, \"message\": string, \"details\"?: object } }`. The direct enrollment endpoints instead return service failures as a top-level `errors[]` array: `{ \"errors\": [ { \"code\": string, \"message\": string, \"field\"?: string } ] }`. Edge-generated failures (API Gateway and WAF, before a request reaches the service) always use the unified `ErrorResponse` envelope, including on the direct enrollment endpoints — most notably a missing or invalid API key (`403 forbidden`).",
+      "type": "text/plain"
+    }
+  }
+}

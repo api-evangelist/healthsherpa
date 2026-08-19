@@ -1,0 +1,871 @@
+{
+  "item": [
+    {
+      "id": "61c03550-24de-4244-9718-f67450bd0fbe",
+      "name": "Enrollment Sessions",
+      "description": {
+        "content": "",
+        "type": "text/plain"
+      },
+      "item": [
+        {
+          "id": "3cbc06d9-f044-41be-be19-38486c99dfa7",
+          "name": "Start an enrollment session",
+          "request": {
+            "name": "Start an enrollment session",
+            "description": {
+              "content": "Returns URLs to continue enrollment in a browser-mediated HealthSherpa flow. This endpoint always returns deep links and does not create direct enrollment application records.\n\nBoth agent-assisted and consumer self-service use cases are supported. Set `context.flow` to `agent_assisted` for an agent walking a client through enrollment, or to `self_service` for a consumer enrolling themselves. The `campaign.*` block and the top-level `plan_id` field are only accepted in self-service flows.\n\nThe entire `context` object and every field inside it is required so partners declare product, exchange, coverage, plan year, flow, and locale on every request rather than relying on hidden defaults. In `self_service`, supply at least one of `location.state` or top-level `plan_id`. In `agent_assisted`, `location.state` is required.",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "v1",
+                "enrollment-sessions"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "header": [
+              {
+                "disabled": false,
+                "description": "Optional partner-supplied request identifier (1–255 chars, `A-Z`, `a-z`, `0-9`, `-`, `_`). Scoped by API key and retained for 24 hours.\n\n- First call: processed normally; the response is captured.\n- Replay (same key + same body): returns the original response verbatim with `Idempotent-Replay: true`.\n- Same key + different body: `422 idempotency_mismatch`.\n- Concurrent retry while the first call is still in flight: `409 idempotency_in_progress`.\n- `429` responses are not stored, so partners can back off and retry transparently.\n- `5xx` responses **are** stored. Retrying a 5xx with the same Idempotency-Key could risk duplicate work, so partners who believe a 5xx was transient must generate a fresh Idempotency-Key to retry.",
+                "key": "Idempotency-Key",
+                "value": "<string>"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "POST",
+            "auth": null,
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"context\": {\n    \"product\": \"<string>\",\n    \"exchange\": \"<string>\",\n    \"coverage_family\": \"<string>\",\n    \"coverage_type\": \"<string>\",\n    \"plan_year\": \"<integer>\",\n    \"flow\": \"<string>\",\n    \"locale\": \"<string>\"\n  },\n  \"external_id\": \"<string>\",\n  \"plan_id\": \"<string>\",\n  \"notes\": \"<string>\",\n  \"providers\": [\n    \"<string>\",\n    \"<string>\"\n  ],\n  \"client\": {\n    \"first_name\": \"<string>\",\n    \"last_name\": \"<string>\",\n    \"email\": \"<string>\",\n    \"phone_number\": \"<string>\"\n  },\n  \"location\": {\n    \"zip_code\": \"<string>\",\n    \"fips_code\": \"<string>\",\n    \"state\": \"<string>\",\n    \"address_line_1\": \"<string>\",\n    \"address_line_2\": \"<string>\",\n    \"city\": \"<string>\"\n  },\n  \"household\": {\n    \"annual_income\": \"<number>\",\n    \"household_size\": \"<integer>\",\n    \"someone_has_employer_coverage\": \"<boolean>\",\n    \"applicants\": [\n      {\n        \"relationship\": \"<string>\",\n        \"first_name\": \"<string>\",\n        \"last_name\": \"<string>\",\n        \"email\": \"<string>\",\n        \"phone_number\": \"<string>\",\n        \"date_of_birth\": \"<date>\",\n        \"age\": \"<integer>\",\n        \"sex\": \"<string>\",\n        \"uses_tobacco\": \"<boolean>\",\n        \"pregnant\": \"<boolean>\",\n        \"parent_caretaker\": \"<boolean>\",\n        \"rejected_by_medicaid_or_chip\": \"<boolean>\",\n        \"unemployment\": \"<boolean>\",\n        \"has_existing_coverage\": \"<boolean>\",\n        \"ichra\": {\n          \"offered\": \"<boolean>\",\n          \"offered_cafeteria\": \"<boolean>\",\n          \"employee_amount\": \"<number>\",\n          \"family_amount\": \"<number>\"\n        },\n        \"prescriptions\": [\n          {\n            \"id\": \"<string>\",\n            \"duration\": \"<integer>\",\n            \"rx_norm_identifier\": \"<string>\"\n          },\n          {\n            \"id\": \"<string>\",\n            \"duration\": \"<integer>\",\n            \"rx_norm_identifier\": \"<string>\"\n          }\n        ],\n        \"income_sources\": [\n          {\n            \"amount\": \"<number>\",\n            \"employer\": \"<string>\"\n          },\n          {\n            \"amount\": \"<number>\",\n            \"employer\": \"<string>\"\n          }\n        ]\n      },\n      {\n        \"relationship\": \"<string>\",\n        \"first_name\": \"<string>\",\n        \"last_name\": \"<string>\",\n        \"email\": \"<string>\",\n        \"phone_number\": \"<string>\",\n        \"date_of_birth\": \"<date>\",\n        \"age\": \"<integer>\",\n        \"sex\": \"<string>\",\n        \"uses_tobacco\": \"<boolean>\",\n        \"pregnant\": \"<boolean>\",\n        \"parent_caretaker\": \"<boolean>\",\n        \"rejected_by_medicaid_or_chip\": \"<boolean>\",\n        \"unemployment\": \"<boolean>\",\n        \"has_existing_coverage\": \"<boolean>\",\n        \"ichra\": {\n          \"offered\": \"<boolean>\",\n          \"offered_cafeteria\": \"<boolean>\",\n          \"employee_amount\": \"<number>\",\n          \"family_amount\": \"<number>\"\n        },\n        \"prescriptions\": [\n          {\n            \"id\": \"<string>\",\n            \"duration\": \"<integer>\",\n            \"rx_norm_identifier\": \"<string>\"\n          },\n          {\n            \"id\": \"<string>\",\n            \"duration\": \"<integer>\",\n            \"rx_norm_identifier\": \"<string>\"\n          }\n        ],\n        \"income_sources\": [\n          {\n            \"amount\": \"<number>\",\n            \"employer\": \"<string>\"\n          },\n          {\n            \"amount\": \"<number>\",\n            \"employer\": \"<string>\"\n          }\n        ]\n      }\n    ]\n  },\n  \"enrollment\": {\n    \"hra\": {\n      \"amount\": \"<number>\",\n      \"frequency\": \"<string>\"\n    }\n  },\n  \"campaign\": {\n    \"cid\": \"<string>\",\n    \"utm_source\": \"<string>\",\n    \"utm_medium\": \"<string>\",\n    \"utm_campaign\": \"<string>\",\n    \"utm_term\": \"<string>\",\n    \"utm_content\": \"<string>\",\n    \"display_phone_number\": \"<string>\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "id": "1ddc9fa9-f3d7-49cc-b137-dc3204127b26",
+              "name": "Enrollment session started successfully.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v1",
+                    "enrollment-sessions"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "disabled": false,
+                    "description": "Optional partner-supplied request identifier (1–255 chars, `A-Z`, `a-z`, `0-9`, `-`, `_`). Scoped by API key and retained for 24 hours.\n\n- First call: processed normally; the response is captured.\n- Replay (same key + same body): returns the original response verbatim with `Idempotent-Replay: true`.\n- Same key + different body: `422 idempotency_mismatch`.\n- Concurrent retry while the first call is still in flight: `409 idempotency_in_progress`.\n- `429` responses are not stored, so partners can back off and retry transparently.\n- `5xx` responses **are** stored. Retrying a 5xx with the same Idempotency-Key could risk duplicate work, so partners who believe a 5xx was transient must generate a fresh Idempotency-Key to retry.",
+                    "key": "Idempotency-Key",
+                    "value": "<string>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"external_id\": \"crm-lead-abc-123\",\n  \"context\": {\n    \"product\": \"aca\",\n    \"exchange\": \"on_exchange\",\n    \"coverage_family\": \"medical\",\n    \"coverage_type\": \"medical\",\n    \"plan_year\": 2026,\n    \"flow\": \"self_service\",\n    \"locale\": \"en-US\"\n  },\n  \"plan_id\": \"12345NY0010001\",\n  \"location\": {\n    \"zip_code\": \"10001\",\n    \"fips_code\": \"36061\",\n    \"state\": \"NY\"\n  },\n  \"household\": {\n    \"annual_income\": 42000,\n    \"household_size\": 1,\n    \"applicants\": [\n      {\n        \"relationship\": \"primary\",\n        \"first_name\": \"Jane\",\n        \"last_name\": \"Doe\",\n        \"email\": \"jane@example.com\",\n        \"phone_number\": \"5551234567\",\n        \"date_of_birth\": \"1990-01-01\",\n        \"sex\": \"female\",\n        \"uses_tobacco\": false\n      }\n    ]\n  }\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "disabled": false,
+                  "description": "HealthSherpa ONE request id for tracing and support.",
+                  "key": "X-Request-Id",
+                  "value": "string"
+                },
+                {
+                  "disabled": false,
+                  "description": "Present and set to `true` only when this response is being replayed from a prior call that supplied the same `Idempotency-Key` and request body.",
+                  "key": "Idempotent-Replay",
+                  "value": "true"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"external_id\": \"crm-lead-abc-123\",\n  \"links\": {\n    \"shopping_url\": \"https://healthsherpa.com/public/shop?external_id=crm-lead-abc-123&fip_code=36061&household_income=42000&household_size=1&people%5Bprimary%5D%5Bage%5D=36&people%5Bprimary%5D%5Bgender%5D=female&people%5Bprimary%5D%5Btobacco%5D=false&state=NY&user_type=consumer&year=2026&zip_code=10001\",\n    \"client_apply_url\": \"https://healthsherpa.com/public/apply?external_id=crm-lead-abc-123&fip_code=36061&household_income=42000&household_size=1&people%5Bprimary%5D%5Bage%5D=36&people%5Bprimary%5D%5Bgender%5D=female&people%5Bprimary%5D%5Btobacco%5D=false&plan_hios_id=12345NY0010001&state=NY&user_type=consumer&year=2026&zip_code=10001\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "db1fc5af-7b54-485b-9f66-fd1bebd25ff6",
+              "name": "Request validation failed. The response body's `error.details` map contains per-field messages when the backend produced the error; edge-generated 400s omit `details`.\n\nA malformed `Idempotency-Key` header is also rejected here with `code: idempotency_key_invalid`.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v1",
+                    "enrollment-sessions"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "disabled": false,
+                    "description": "Optional partner-supplied request identifier (1–255 chars, `A-Z`, `a-z`, `0-9`, `-`, `_`). Scoped by API key and retained for 24 hours.\n\n- First call: processed normally; the response is captured.\n- Replay (same key + same body): returns the original response verbatim with `Idempotent-Replay: true`.\n- Same key + different body: `422 idempotency_mismatch`.\n- Concurrent retry while the first call is still in flight: `409 idempotency_in_progress`.\n- `429` responses are not stored, so partners can back off and retry transparently.\n- `5xx` responses **are** stored. Retrying a 5xx with the same Idempotency-Key could risk duplicate work, so partners who believe a 5xx was transient must generate a fresh Idempotency-Key to retry.",
+                    "key": "Idempotency-Key",
+                    "value": "<string>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"external_id\": \"crm-lead-abc-123\",\n  \"context\": {\n    \"product\": \"aca\",\n    \"exchange\": \"on_exchange\",\n    \"coverage_family\": \"medical\",\n    \"coverage_type\": \"medical\",\n    \"plan_year\": 2026,\n    \"flow\": \"self_service\",\n    \"locale\": \"en-US\"\n  },\n  \"plan_id\": \"12345NY0010001\",\n  \"location\": {\n    \"zip_code\": \"10001\",\n    \"fips_code\": \"36061\",\n    \"state\": \"NY\"\n  },\n  \"household\": {\n    \"annual_income\": 42000,\n    \"household_size\": 1,\n    \"applicants\": [\n      {\n        \"relationship\": \"primary\",\n        \"first_name\": \"Jane\",\n        \"last_name\": \"Doe\",\n        \"email\": \"jane@example.com\",\n        \"phone_number\": \"5551234567\",\n        \"date_of_birth\": \"1990-01-01\",\n        \"sex\": \"female\",\n        \"uses_tobacco\": false\n      }\n    ]\n  }\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"error\": {\n    \"code\": \"invalid_request\",\n    \"message\": \"Validation failed.\",\n    \"details\": {\n      \"zip_code\": [\n        \"ZIP code must be 5 digits\"\n      ]\n    }\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "717fc8ab-4f52-4605-b303-1aed578df9d7",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v1",
+                    "enrollment-sessions"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "disabled": false,
+                    "description": "Optional partner-supplied request identifier (1–255 chars, `A-Z`, `a-z`, `0-9`, `-`, `_`). Scoped by API key and retained for 24 hours.\n\n- First call: processed normally; the response is captured.\n- Replay (same key + same body): returns the original response verbatim with `Idempotent-Replay: true`.\n- Same key + different body: `422 idempotency_mismatch`.\n- Concurrent retry while the first call is still in flight: `409 idempotency_in_progress`.\n- `429` responses are not stored, so partners can back off and retry transparently.\n- `5xx` responses **are** stored. Retrying a 5xx with the same Idempotency-Key could risk duplicate work, so partners who believe a 5xx was transient must generate a fresh Idempotency-Key to retry.",
+                    "key": "Idempotency-Key",
+                    "value": "<string>"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"external_id\": \"crm-lead-abc-123\",\n  \"context\": {\n    \"product\": \"aca\",\n    \"exchange\": \"on_exchange\",\n    \"coverage_family\": \"medical\",\n    \"coverage_type\": \"medical\",\n    \"plan_year\": 2026,\n    \"flow\": \"self_service\",\n    \"locale\": \"en-US\"\n  },\n  \"plan_id\": \"12345NY0010001\",\n  \"location\": {\n    \"zip_code\": \"10001\",\n    \"fips_code\": \"36061\",\n    \"state\": \"NY\"\n  },\n  \"household\": {\n    \"annual_income\": 42000,\n    \"household_size\": 1,\n    \"applicants\": [\n      {\n        \"relationship\": \"primary\",\n        \"first_name\": \"Jane\",\n        \"last_name\": \"Doe\",\n        \"email\": \"jane@example.com\",\n        \"phone_number\": \"5551234567\",\n        \"date_of_birth\": \"1990-01-01\",\n        \"sex\": \"female\",\n        \"uses_tobacco\": false\n      }\n    ]\n  }\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "text/plain"
+                }
+              ],
+              "body": "",
+              "cookie": [],
+              "_postman_previewlanguage": "text"
+            },
+            {
+              "id": "33942e94-5039-4561-8953-f73d35e06340",
+              "name": "Returned when this API key is not authorized to call this endpoint, or when the developer's HealthSherpa Marketplace setup is not in the state the requested flow needs.\n\n- `context.flow = \"agent_assisted\"` requires approved on-exchange enrollment access (`onExchangeEnrollmentRequestApprovalStatus = \"approved\"`) and a healthy HealthSherpa Marketplace OAuth link (account approved, integration `active`, on-exchange capability `ready`, and the access token unexpired or refreshable). The OAuth-linked HealthSherpa Marketplace agent must also belong to an agency that is approved for enrollment deeplink URL generation. If HealthSherpa cannot generate `shopping_url` or `client_apply_url` because the agent account or agency is not approved for deeplink access, the API returns `403 forbidden` and does not treat the result as retryable service unavailability.\n- `context.flow = \"self_service\"` requires approved on-exchange enrollment access (`onExchangeEnrollmentRequestApprovalStatus = \"approved\"`) and a configured deeplink agent ID.\n\nBoth flows require approved on-exchange enrollment access. The self-service gate does not consult the OAuth link, and the agent-assisted gate does not consult the deeplink agent ID. Each flow only fails when the configuration it actually uses is not satisfied.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v1",
+                    "enrollment-sessions"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "disabled": false,
+                    "description": "Optional partner-supplied request identifier (1–255 chars, `A-Z`, `a-z`, `0-9`, `-`, `_`). Scoped by API key and retained for 24 hours.\n\n- First call: processed normally; the response is captured.\n- Replay (same key + same body): returns the original response verbatim with `Idempotent-Replay: true`.\n- Same key + different body: `422 idempotency_mismatch`.\n- Concurrent retry while the first call is still in flight: `409 idempotency_in_progress`.\n- `429` responses are not stored, so partners can back off and retry transparently.\n- `5xx` responses **are** stored. Retrying a 5xx with the same Idempotency-Key could risk duplicate work, so partners who believe a 5xx was transient must generate a fresh Idempotency-Key to retry.",
+                    "key": "Idempotency-Key",
+                    "value": "<string>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"external_id\": \"crm-lead-abc-123\",\n  \"context\": {\n    \"product\": \"aca\",\n    \"exchange\": \"on_exchange\",\n    \"coverage_family\": \"medical\",\n    \"coverage_type\": \"medical\",\n    \"plan_year\": 2026,\n    \"flow\": \"self_service\",\n    \"locale\": \"en-US\"\n  },\n  \"plan_id\": \"12345NY0010001\",\n  \"location\": {\n    \"zip_code\": \"10001\",\n    \"fips_code\": \"36061\",\n    \"state\": \"NY\"\n  },\n  \"household\": {\n    \"annual_income\": 42000,\n    \"household_size\": 1,\n    \"applicants\": [\n      {\n        \"relationship\": \"primary\",\n        \"first_name\": \"Jane\",\n        \"last_name\": \"Doe\",\n        \"email\": \"jane@example.com\",\n        \"phone_number\": \"5551234567\",\n        \"date_of_birth\": \"1990-01-01\",\n        \"sex\": \"female\",\n        \"uses_tobacco\": false\n      }\n    ]\n  }\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Forbidden",
+              "code": 403,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"error\": {\n    \"code\": \"forbidden\",\n    \"message\": \"This API key is not authorized to access this endpoint.\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "6bf800f1-4da8-4cd3-984f-ffd2409832b0",
+              "name": "A previous request with the same `Idempotency-Key` is still being processed by the API. The partner should wait briefly and retry. The response is not produced by the upstream service — the in-flight request from the first call will succeed or fail on its own.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v1",
+                    "enrollment-sessions"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "disabled": false,
+                    "description": "Optional partner-supplied request identifier (1–255 chars, `A-Z`, `a-z`, `0-9`, `-`, `_`). Scoped by API key and retained for 24 hours.\n\n- First call: processed normally; the response is captured.\n- Replay (same key + same body): returns the original response verbatim with `Idempotent-Replay: true`.\n- Same key + different body: `422 idempotency_mismatch`.\n- Concurrent retry while the first call is still in flight: `409 idempotency_in_progress`.\n- `429` responses are not stored, so partners can back off and retry transparently.\n- `5xx` responses **are** stored. Retrying a 5xx with the same Idempotency-Key could risk duplicate work, so partners who believe a 5xx was transient must generate a fresh Idempotency-Key to retry.",
+                    "key": "Idempotency-Key",
+                    "value": "<string>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"external_id\": \"crm-lead-abc-123\",\n  \"context\": {\n    \"product\": \"aca\",\n    \"exchange\": \"on_exchange\",\n    \"coverage_family\": \"medical\",\n    \"coverage_type\": \"medical\",\n    \"plan_year\": 2026,\n    \"flow\": \"self_service\",\n    \"locale\": \"en-US\"\n  },\n  \"plan_id\": \"12345NY0010001\",\n  \"location\": {\n    \"zip_code\": \"10001\",\n    \"fips_code\": \"36061\",\n    \"state\": \"NY\"\n  },\n  \"household\": {\n    \"annual_income\": 42000,\n    \"household_size\": 1,\n    \"applicants\": [\n      {\n        \"relationship\": \"primary\",\n        \"first_name\": \"Jane\",\n        \"last_name\": \"Doe\",\n        \"email\": \"jane@example.com\",\n        \"phone_number\": \"5551234567\",\n        \"date_of_birth\": \"1990-01-01\",\n        \"sex\": \"female\",\n        \"uses_tobacco\": false\n      }\n    ]\n  }\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Conflict",
+              "code": 409,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"error\": {\n    \"code\": \"idempotency_in_progress\",\n    \"message\": \"A request with this Idempotency-Key is already being processed. Retry once it completes.\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "e81b7a5d-111f-4f1f-b3e9-58eb88c18a3d",
+              "name": "The request body exceeded the maximum size accepted by the API edge.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v1",
+                    "enrollment-sessions"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "disabled": false,
+                    "description": "Optional partner-supplied request identifier (1–255 chars, `A-Z`, `a-z`, `0-9`, `-`, `_`). Scoped by API key and retained for 24 hours.\n\n- First call: processed normally; the response is captured.\n- Replay (same key + same body): returns the original response verbatim with `Idempotent-Replay: true`.\n- Same key + different body: `422 idempotency_mismatch`.\n- Concurrent retry while the first call is still in flight: `409 idempotency_in_progress`.\n- `429` responses are not stored, so partners can back off and retry transparently.\n- `5xx` responses **are** stored. Retrying a 5xx with the same Idempotency-Key could risk duplicate work, so partners who believe a 5xx was transient must generate a fresh Idempotency-Key to retry.",
+                    "key": "Idempotency-Key",
+                    "value": "<string>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"external_id\": \"crm-lead-abc-123\",\n  \"context\": {\n    \"product\": \"aca\",\n    \"exchange\": \"on_exchange\",\n    \"coverage_family\": \"medical\",\n    \"coverage_type\": \"medical\",\n    \"plan_year\": 2026,\n    \"flow\": \"self_service\",\n    \"locale\": \"en-US\"\n  },\n  \"plan_id\": \"12345NY0010001\",\n  \"location\": {\n    \"zip_code\": \"10001\",\n    \"fips_code\": \"36061\",\n    \"state\": \"NY\"\n  },\n  \"household\": {\n    \"annual_income\": 42000,\n    \"household_size\": 1,\n    \"applicants\": [\n      {\n        \"relationship\": \"primary\",\n        \"first_name\": \"Jane\",\n        \"last_name\": \"Doe\",\n        \"email\": \"jane@example.com\",\n        \"phone_number\": \"5551234567\",\n        \"date_of_birth\": \"1990-01-01\",\n        \"sex\": \"female\",\n        \"uses_tobacco\": false\n      }\n    ]\n  }\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Request Entity Too Large",
+              "code": 413,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"error\": {\n    \"code\": \"payload_too_large\",\n    \"message\": \"The request payload exceeded the maximum allowed size.\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "42d45e9f-504a-4d61-a121-28786788a131",
+              "name": "The request `Content-Type` is not supported by the endpoint.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v1",
+                    "enrollment-sessions"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "disabled": false,
+                    "description": "Optional partner-supplied request identifier (1–255 chars, `A-Z`, `a-z`, `0-9`, `-`, `_`). Scoped by API key and retained for 24 hours.\n\n- First call: processed normally; the response is captured.\n- Replay (same key + same body): returns the original response verbatim with `Idempotent-Replay: true`.\n- Same key + different body: `422 idempotency_mismatch`.\n- Concurrent retry while the first call is still in flight: `409 idempotency_in_progress`.\n- `429` responses are not stored, so partners can back off and retry transparently.\n- `5xx` responses **are** stored. Retrying a 5xx with the same Idempotency-Key could risk duplicate work, so partners who believe a 5xx was transient must generate a fresh Idempotency-Key to retry.",
+                    "key": "Idempotency-Key",
+                    "value": "<string>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"external_id\": \"crm-lead-abc-123\",\n  \"context\": {\n    \"product\": \"aca\",\n    \"exchange\": \"on_exchange\",\n    \"coverage_family\": \"medical\",\n    \"coverage_type\": \"medical\",\n    \"plan_year\": 2026,\n    \"flow\": \"self_service\",\n    \"locale\": \"en-US\"\n  },\n  \"plan_id\": \"12345NY0010001\",\n  \"location\": {\n    \"zip_code\": \"10001\",\n    \"fips_code\": \"36061\",\n    \"state\": \"NY\"\n  },\n  \"household\": {\n    \"annual_income\": 42000,\n    \"household_size\": 1,\n    \"applicants\": [\n      {\n        \"relationship\": \"primary\",\n        \"first_name\": \"Jane\",\n        \"last_name\": \"Doe\",\n        \"email\": \"jane@example.com\",\n        \"phone_number\": \"5551234567\",\n        \"date_of_birth\": \"1990-01-01\",\n        \"sex\": \"female\",\n        \"uses_tobacco\": false\n      }\n    ]\n  }\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Unsupported Media Type",
+              "code": 415,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"error\": {\n    \"code\": \"unsupported_media_type\",\n    \"message\": \"The request Content-Type is not supported by this endpoint.\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "c7768d45-d03a-47c0-8767-2d1156d33d95",
+              "name": "The `Idempotency-Key` has been used before within the 24-hour retention window, but the current request body is not byte-for-byte identical to the original. To resolve, either resubmit the exact original payload or generate a fresh `Idempotency-Key` for the new request.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v1",
+                    "enrollment-sessions"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "disabled": false,
+                    "description": "Optional partner-supplied request identifier (1–255 chars, `A-Z`, `a-z`, `0-9`, `-`, `_`). Scoped by API key and retained for 24 hours.\n\n- First call: processed normally; the response is captured.\n- Replay (same key + same body): returns the original response verbatim with `Idempotent-Replay: true`.\n- Same key + different body: `422 idempotency_mismatch`.\n- Concurrent retry while the first call is still in flight: `409 idempotency_in_progress`.\n- `429` responses are not stored, so partners can back off and retry transparently.\n- `5xx` responses **are** stored. Retrying a 5xx with the same Idempotency-Key could risk duplicate work, so partners who believe a 5xx was transient must generate a fresh Idempotency-Key to retry.",
+                    "key": "Idempotency-Key",
+                    "value": "<string>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"external_id\": \"crm-lead-abc-123\",\n  \"context\": {\n    \"product\": \"aca\",\n    \"exchange\": \"on_exchange\",\n    \"coverage_family\": \"medical\",\n    \"coverage_type\": \"medical\",\n    \"plan_year\": 2026,\n    \"flow\": \"self_service\",\n    \"locale\": \"en-US\"\n  },\n  \"plan_id\": \"12345NY0010001\",\n  \"location\": {\n    \"zip_code\": \"10001\",\n    \"fips_code\": \"36061\",\n    \"state\": \"NY\"\n  },\n  \"household\": {\n    \"annual_income\": 42000,\n    \"household_size\": 1,\n    \"applicants\": [\n      {\n        \"relationship\": \"primary\",\n        \"first_name\": \"Jane\",\n        \"last_name\": \"Doe\",\n        \"email\": \"jane@example.com\",\n        \"phone_number\": \"5551234567\",\n        \"date_of_birth\": \"1990-01-01\",\n        \"sex\": \"female\",\n        \"uses_tobacco\": false\n      }\n    ]\n  }\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Unprocessable Entity (WebDAV) (RFC 4918)",
+              "code": 422,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"error\": {\n    \"code\": \"idempotency_mismatch\",\n    \"message\": \"This Idempotency-Key has already been used with a different request body.\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "665b0454-0057-4e01-a77c-747ef7259af9",
+              "name": "Rate limit exceeded. Clients should back off and retry after the delay advertised in the Retry-After header.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v1",
+                    "enrollment-sessions"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "disabled": false,
+                    "description": "Optional partner-supplied request identifier (1–255 chars, `A-Z`, `a-z`, `0-9`, `-`, `_`). Scoped by API key and retained for 24 hours.\n\n- First call: processed normally; the response is captured.\n- Replay (same key + same body): returns the original response verbatim with `Idempotent-Replay: true`.\n- Same key + different body: `422 idempotency_mismatch`.\n- Concurrent retry while the first call is still in flight: `409 idempotency_in_progress`.\n- `429` responses are not stored, so partners can back off and retry transparently.\n- `5xx` responses **are** stored. Retrying a 5xx with the same Idempotency-Key could risk duplicate work, so partners who believe a 5xx was transient must generate a fresh Idempotency-Key to retry.",
+                    "key": "Idempotency-Key",
+                    "value": "<string>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"external_id\": \"crm-lead-abc-123\",\n  \"context\": {\n    \"product\": \"aca\",\n    \"exchange\": \"on_exchange\",\n    \"coverage_family\": \"medical\",\n    \"coverage_type\": \"medical\",\n    \"plan_year\": 2026,\n    \"flow\": \"self_service\",\n    \"locale\": \"en-US\"\n  },\n  \"plan_id\": \"12345NY0010001\",\n  \"location\": {\n    \"zip_code\": \"10001\",\n    \"fips_code\": \"36061\",\n    \"state\": \"NY\"\n  },\n  \"household\": {\n    \"annual_income\": 42000,\n    \"household_size\": 1,\n    \"applicants\": [\n      {\n        \"relationship\": \"primary\",\n        \"first_name\": \"Jane\",\n        \"last_name\": \"Doe\",\n        \"email\": \"jane@example.com\",\n        \"phone_number\": \"5551234567\",\n        \"date_of_birth\": \"1990-01-01\",\n        \"sex\": \"female\",\n        \"uses_tobacco\": false\n      }\n    ]\n  }\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Too Many Requests",
+              "code": 429,
+              "header": [
+                {
+                  "disabled": false,
+                  "description": "Number of seconds the client should wait before retrying.",
+                  "key": "Retry-After",
+                  "value": "2308"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"error\": {\n    \"code\": \"rate_limited\",\n    \"message\": \"Request rate limit exceeded. Please slow down and retry shortly.\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "eedbb53a-90db-4392-8c54-73ad180671cf",
+              "name": "An unexpected error occurred.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v1",
+                    "enrollment-sessions"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "disabled": false,
+                    "description": "Optional partner-supplied request identifier (1–255 chars, `A-Z`, `a-z`, `0-9`, `-`, `_`). Scoped by API key and retained for 24 hours.\n\n- First call: processed normally; the response is captured.\n- Replay (same key + same body): returns the original response verbatim with `Idempotent-Replay: true`.\n- Same key + different body: `422 idempotency_mismatch`.\n- Concurrent retry while the first call is still in flight: `409 idempotency_in_progress`.\n- `429` responses are not stored, so partners can back off and retry transparently.\n- `5xx` responses **are** stored. Retrying a 5xx with the same Idempotency-Key could risk duplicate work, so partners who believe a 5xx was transient must generate a fresh Idempotency-Key to retry.",
+                    "key": "Idempotency-Key",
+                    "value": "<string>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"external_id\": \"crm-lead-abc-123\",\n  \"context\": {\n    \"product\": \"aca\",\n    \"exchange\": \"on_exchange\",\n    \"coverage_family\": \"medical\",\n    \"coverage_type\": \"medical\",\n    \"plan_year\": 2026,\n    \"flow\": \"self_service\",\n    \"locale\": \"en-US\"\n  },\n  \"plan_id\": \"12345NY0010001\",\n  \"location\": {\n    \"zip_code\": \"10001\",\n    \"fips_code\": \"36061\",\n    \"state\": \"NY\"\n  },\n  \"household\": {\n    \"annual_income\": 42000,\n    \"household_size\": 1,\n    \"applicants\": [\n      {\n        \"relationship\": \"primary\",\n        \"first_name\": \"Jane\",\n        \"last_name\": \"Doe\",\n        \"email\": \"jane@example.com\",\n        \"phone_number\": \"5551234567\",\n        \"date_of_birth\": \"1990-01-01\",\n        \"sex\": \"female\",\n        \"uses_tobacco\": false\n      }\n    ]\n  }\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Internal Server Error",
+              "code": 500,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"error\": {\n    \"code\": \"internal_error\",\n    \"message\": \"An unexpected error occurred.\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "4bb8d821-588f-448d-b2aa-8e4cf1e16ac8",
+              "name": "The API edge received an invalid response from the backend.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v1",
+                    "enrollment-sessions"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "disabled": false,
+                    "description": "Optional partner-supplied request identifier (1–255 chars, `A-Z`, `a-z`, `0-9`, `-`, `_`). Scoped by API key and retained for 24 hours.\n\n- First call: processed normally; the response is captured.\n- Replay (same key + same body): returns the original response verbatim with `Idempotent-Replay: true`.\n- Same key + different body: `422 idempotency_mismatch`.\n- Concurrent retry while the first call is still in flight: `409 idempotency_in_progress`.\n- `429` responses are not stored, so partners can back off and retry transparently.\n- `5xx` responses **are** stored. Retrying a 5xx with the same Idempotency-Key could risk duplicate work, so partners who believe a 5xx was transient must generate a fresh Idempotency-Key to retry.",
+                    "key": "Idempotency-Key",
+                    "value": "<string>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"external_id\": \"crm-lead-abc-123\",\n  \"context\": {\n    \"product\": \"aca\",\n    \"exchange\": \"on_exchange\",\n    \"coverage_family\": \"medical\",\n    \"coverage_type\": \"medical\",\n    \"plan_year\": 2026,\n    \"flow\": \"self_service\",\n    \"locale\": \"en-US\"\n  },\n  \"plan_id\": \"12345NY0010001\",\n  \"location\": {\n    \"zip_code\": \"10001\",\n    \"fips_code\": \"36061\",\n    \"state\": \"NY\"\n  },\n  \"household\": {\n    \"annual_income\": 42000,\n    \"household_size\": 1,\n    \"applicants\": [\n      {\n        \"relationship\": \"primary\",\n        \"first_name\": \"Jane\",\n        \"last_name\": \"Doe\",\n        \"email\": \"jane@example.com\",\n        \"phone_number\": \"5551234567\",\n        \"date_of_birth\": \"1990-01-01\",\n        \"sex\": \"female\",\n        \"uses_tobacco\": false\n      }\n    ]\n  }\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Bad Gateway",
+              "code": 502,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"error\": {\n    \"code\": \"bad_gateway\",\n    \"message\": \"The API edge received an invalid response from the backend. Please try again later.\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "534f525c-2df0-4f8f-8db8-bfbf5f63c4c8",
+              "name": "The API is temporarily unable to serve the request. This may be returned by the API edge when the backend is unhealthy, or by the backend when an upstream catalog, quoting, or lookup service is unavailable.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v1",
+                    "enrollment-sessions"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "disabled": false,
+                    "description": "Optional partner-supplied request identifier (1–255 chars, `A-Z`, `a-z`, `0-9`, `-`, `_`). Scoped by API key and retained for 24 hours.\n\n- First call: processed normally; the response is captured.\n- Replay (same key + same body): returns the original response verbatim with `Idempotent-Replay: true`.\n- Same key + different body: `422 idempotency_mismatch`.\n- Concurrent retry while the first call is still in flight: `409 idempotency_in_progress`.\n- `429` responses are not stored, so partners can back off and retry transparently.\n- `5xx` responses **are** stored. Retrying a 5xx with the same Idempotency-Key could risk duplicate work, so partners who believe a 5xx was transient must generate a fresh Idempotency-Key to retry.",
+                    "key": "Idempotency-Key",
+                    "value": "<string>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"external_id\": \"crm-lead-abc-123\",\n  \"context\": {\n    \"product\": \"aca\",\n    \"exchange\": \"on_exchange\",\n    \"coverage_family\": \"medical\",\n    \"coverage_type\": \"medical\",\n    \"plan_year\": 2026,\n    \"flow\": \"self_service\",\n    \"locale\": \"en-US\"\n  },\n  \"plan_id\": \"12345NY0010001\",\n  \"location\": {\n    \"zip_code\": \"10001\",\n    \"fips_code\": \"36061\",\n    \"state\": \"NY\"\n  },\n  \"household\": {\n    \"annual_income\": 42000,\n    \"household_size\": 1,\n    \"applicants\": [\n      {\n        \"relationship\": \"primary\",\n        \"first_name\": \"Jane\",\n        \"last_name\": \"Doe\",\n        \"email\": \"jane@example.com\",\n        \"phone_number\": \"5551234567\",\n        \"date_of_birth\": \"1990-01-01\",\n        \"sex\": \"female\",\n        \"uses_tobacco\": false\n      }\n    ]\n  }\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Service Unavailable",
+              "code": 503,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"error\": {\n    \"code\": \"service_unavailable\",\n    \"message\": \"The service is temporarily unavailable. Please try again later.\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "37a7d25d-9c6b-4387-9b25-dc7eaf22c9be",
+              "name": "The API edge did not receive a timely response from the backend.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v1",
+                    "enrollment-sessions"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "disabled": false,
+                    "description": "Optional partner-supplied request identifier (1–255 chars, `A-Z`, `a-z`, `0-9`, `-`, `_`). Scoped by API key and retained for 24 hours.\n\n- First call: processed normally; the response is captured.\n- Replay (same key + same body): returns the original response verbatim with `Idempotent-Replay: true`.\n- Same key + different body: `422 idempotency_mismatch`.\n- Concurrent retry while the first call is still in flight: `409 idempotency_in_progress`.\n- `429` responses are not stored, so partners can back off and retry transparently.\n- `5xx` responses **are** stored. Retrying a 5xx with the same Idempotency-Key could risk duplicate work, so partners who believe a 5xx was transient must generate a fresh Idempotency-Key to retry.",
+                    "key": "Idempotency-Key",
+                    "value": "<string>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"external_id\": \"crm-lead-abc-123\",\n  \"context\": {\n    \"product\": \"aca\",\n    \"exchange\": \"on_exchange\",\n    \"coverage_family\": \"medical\",\n    \"coverage_type\": \"medical\",\n    \"plan_year\": 2026,\n    \"flow\": \"self_service\",\n    \"locale\": \"en-US\"\n  },\n  \"plan_id\": \"12345NY0010001\",\n  \"location\": {\n    \"zip_code\": \"10001\",\n    \"fips_code\": \"36061\",\n    \"state\": \"NY\"\n  },\n  \"household\": {\n    \"annual_income\": 42000,\n    \"household_size\": 1,\n    \"applicants\": [\n      {\n        \"relationship\": \"primary\",\n        \"first_name\": \"Jane\",\n        \"last_name\": \"Doe\",\n        \"email\": \"jane@example.com\",\n        \"phone_number\": \"5551234567\",\n        \"date_of_birth\": \"1990-01-01\",\n        \"sex\": \"female\",\n        \"uses_tobacco\": false\n      }\n    ]\n  }\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Gateway Timeout",
+              "code": 504,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"error\": {\n    \"code\": \"gateway_timeout\",\n    \"message\": \"The API edge did not receive a timely response from the backend. Please try again later.\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        }
+      ],
+      "event": []
+    }
+  ],
+  "event": [],
+  "variable": [
+    {
+      "type": "string",
+      "value": "https://api.one.healthsherpa.com",
+      "key": "baseUrl"
+    }
+  ],
+  "auth": {
+    "type": "apikey",
+    "apikey": [
+      {
+        "key": "key",
+        "value": "x-api-key"
+      },
+      {
+        "key": "value",
+        "value": "{{apiKey}}"
+      },
+      {
+        "key": "in",
+        "value": "header"
+      }
+    ]
+  },
+  "info": {
+    "_postman_id": "f92d7389-b1b2-4ae7-a45f-8b73687cd68b",
+    "name": "HealthSherpa Public Enrollment Sessions API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": {
+      "content": "Machine-readable contract for the currently available public HealthSherpa endpoints: GET /v1/ping, GET /v1/reference/counties, GET /v1/reference/issuers, GET /v1/reference/providers, POST /v1/quotes, the approval-gated POST /v1/enrollment-sessions, and the approval-gated direct enrollment endpoints GET /v1/enrollments, POST /v1/enrollments, PUT /v1/enrollments/{enrollment_id}, GET /v1/enrollments/{enrollment_id}, POST /v1/enrollments/{enrollment_id}/cancellations, POST /v1/enrollments/{enrollment_id}/terminations, POST /v1/enrollments/{enrollment_id}/submissions, GET /v1/enrollments/{enrollment_id}/payment_redirect, and POST /v1/enrollments/{enrollment_id}/supporting_documentation. Object schemas remain additive and clients should ignore response fields they do not recognize.\n\nMost HealthSherpa-owned errors follow the unified `ErrorResponse` schema: `{ \"error\": { \"code\": string, \"message\": string, \"details\"?: object } }`. The direct enrollment endpoints instead return service failures as a top-level `errors[]` array: `{ \"errors\": [ { \"code\": string, \"message\": string, \"field\"?: string } ] }`. Edge-generated failures (API Gateway and WAF, before a request reaches the service) always use the unified `ErrorResponse` envelope, including on the direct enrollment endpoints — most notably a missing or invalid API key (`403 forbidden`).",
+      "type": "text/plain"
+    }
+  }
+}

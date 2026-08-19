@@ -1,0 +1,47 @@
+{
+  "opencollection": "1.0.0",
+  "info": {
+    "name": "HealthSherpa Public Enrollment Sessions API",
+    "version": "0.1.0"
+  },
+  "request": {
+    "auth": {
+      "type": "apikey",
+      "key": "x-api-key",
+      "value": "{{x-api-key}}",
+      "placement": "header"
+    }
+  },
+  "items": [
+    {
+      "info": {
+        "name": "Enrollment Sessions",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "Start an enrollment session",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://api.one.healthsherpa.com/v1/enrollment-sessions",
+            "headers": [
+              {
+                "name": "Idempotency-Key",
+                "value": ""
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Returns URLs to continue enrollment in a browser-mediated HealthSherpa flow. This endpoint always returns deep links and does not create direct enrollment application records.\n\nBoth agent-assisted and consumer self-service use cases are supported. Set `context.flow` to `agent_assisted` for an agent walking a client through enrollment, or to `self_service` for a consumer enrolling themselves. The `campaign.*` block and the top-level `plan_id` field are only accepted in self-service flows.\n\nThe en"
+        }
+      ]
+    }
+  ],
+  "bundled": true
+}

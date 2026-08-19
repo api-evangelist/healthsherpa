@@ -1,0 +1,303 @@
+{
+  "opencollection": "1.0.0",
+  "info": {
+    "name": "HealthSherpa Public Enrollment Sessions Enrollments API",
+    "version": "0.1.0"
+  },
+  "request": {
+    "auth": {
+      "type": "apikey",
+      "key": "x-api-key",
+      "value": "{{x-api-key}}",
+      "placement": "header"
+    }
+  },
+  "items": [
+    {
+      "info": {
+        "name": "Enrollments",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "List direct enrollment applications",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.one.healthsherpa.com/v1/enrollments",
+            "params": [
+              {
+                "name": "product",
+                "value": "",
+                "type": "query",
+                "description": "Direct-enrollment product. Must be `ichra`."
+              },
+              {
+                "name": "exchange",
+                "value": "",
+                "type": "query",
+                "description": "Direct-enrollment routing channel. Must be `off_exchange`."
+              },
+              {
+                "name": "policy_status",
+                "value": "",
+                "type": "query",
+                "description": "Filter applications by carrier policy status."
+              },
+              {
+                "name": "external_id",
+                "value": "",
+                "type": "query",
+                "description": "Filter by the partner-supplied external application id."
+              },
+              {
+                "name": "plan_year",
+                "value": "",
+                "type": "query",
+                "description": "Filter by application plan year."
+              },
+              {
+                "name": "issuer_hios_id",
+                "value": "",
+                "type": "query",
+                "description": "Filter by issuer HIOS id."
+              },
+              {
+                "name": "plan_hios_id",
+                "value": "",
+                "type": "query",
+                "description": "Filter by plan HIOS id."
+              },
+              {
+                "name": "employer_external_id",
+                "value": "",
+                "type": "query",
+                "description": "Filter by the employer's external identifier."
+              },
+              {
+                "name": "updated_since",
+                "value": "",
+                "type": "query",
+                "description": "ISO 8601 timestamp. Returns applications updated after this time."
+              },
+              {
+                "name": "limit",
+                "value": "",
+                "type": "query",
+                "description": "Maximum number of applications to return."
+              },
+              {
+                "name": "offset",
+                "value": "",
+                "type": "query",
+                "description": "Zero-based pagination offset."
+              }
+            ]
+          },
+          "docs": "Approval-gated direct enrollment API for listing off-exchange applications for the approved account. Send `product=ichra` and `exchange=off_exchange` as required query parameters so HealthSherpa ONE can validate the direct-enrollment routing channel. The response is paginated and can be filtered by policy status, partner or employer ids, plan identifiers, plan year, and last-updated timestamp. Only the documented list filters are supported; unsupported query parameters are rejected with `400 inv"
+        },
+        {
+          "info": {
+            "name": "Create a direct enrollment application",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://api.one.healthsherpa.com/v1/enrollments",
+            "headers": [
+              {
+                "name": "Idempotency-Key",
+                "value": ""
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Approval-gated direct enrollment API for partners that need API-level control over off-exchange applications. Send the application payload at the request root and include the HealthSherpa ONE `context` object for routing. Direct enrollment currently supports `context.product = \"ichra\"` and `context.exchange = \"off_exchange\"`; other products and exchanges are not supported here. Use `POST /v1/enrollment-sessions` for on-exchange enrollment. HealthSherpa ONE uses `context` only for routing and app"
+        },
+        {
+          "info": {
+            "name": "Submit a direct enrollment application",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://api.one.healthsherpa.com/v1/enrollments/:enrollment_id/submissions",
+            "params": [
+              {
+                "name": "enrollment_id",
+                "value": "",
+                "type": "path",
+                "description": "Application id returned by `POST /v1/enrollments`."
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Approval-gated direct enrollment API for submitting an off-exchange application to the carrier. Send the HealthSherpa ONE `context` object with `product = \"ichra\"` and `exchange = \"off_exchange\"`; `plan_year` is not required for submission. Check `errors[]` on the application response before calling; submission fails with `422` if the application still has outstanding errors. A successful call returns `202 Accepted`; submission processing can continue asynchronously, so poll `GET /v1/enrollments"
+        },
+        {
+          "info": {
+            "name": "Cancel a direct enrollment application",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://api.one.healthsherpa.com/v1/enrollments/:enrollment_id/cancellations",
+            "params": [
+              {
+                "name": "enrollment_id",
+                "value": "",
+                "type": "path",
+                "description": "Application id returned by `POST /v1/enrollments`."
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Approval-gated direct enrollment API for cancelling an off-exchange application that is pending effectuation. Send the HealthSherpa ONE `context` object with `product = \"ichra\"` and `exchange = \"off_exchange\"`. Not all carriers support cancellation; check the application read response for carrier capabilities before calling. A successful response returns `202 Accepted` with the updated status-change data. If a network timeout or other unknown-result failure occurs after calling cancel, poll `GET"
+        },
+        {
+          "info": {
+            "name": "Terminate an active policy",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://api.one.healthsherpa.com/v1/enrollments/:enrollment_id/terminations",
+            "params": [
+              {
+                "name": "enrollment_id",
+                "value": "",
+                "type": "path",
+                "description": "Application id returned by `POST /v1/enrollments`."
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Approval-gated direct enrollment API for terminating an active off-exchange policy before its natural expiration date. Send the HealthSherpa ONE `context` object with `product = \"ichra\"` and `exchange = \"off_exchange\"`. Not all carriers support termination; check the application read response for carrier capabilities before calling. A successful response returns `202 Accepted` with the updated status-change data. If a network timeout or other unknown-result failure occurs after calling terminate"
+        },
+        {
+          "info": {
+            "name": "Get payment redirect data",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.one.healthsherpa.com/v1/enrollments/:enrollment_id/payment_redirect",
+            "params": [
+              {
+                "name": "enrollment_id",
+                "value": "",
+                "type": "path",
+                "description": "Application id returned by `POST /v1/enrollments`."
+              },
+              {
+                "name": "product",
+                "value": "",
+                "type": "query",
+                "description": "Direct-enrollment product. Must be `ichra`."
+              },
+              {
+                "name": "exchange",
+                "value": "",
+                "type": "query",
+                "description": "Direct-enrollment routing channel. Must be `off_exchange`."
+              }
+            ]
+          },
+          "docs": "Approval-gated direct enrollment API for retrieving the carrier payment redirect data for an off-exchange application. Send `product=ichra` and `exchange=off_exchange` as required query parameters so HealthSherpa ONE can validate the direct-enrollment routing channel. Use this when the application response includes `payment_instructions.payment_redirect_supported = true`.\n\nThe response includes the carrier endpoint URL, the HTTP method, and form fields to submit in the shopper's browser. The key"
+        },
+        {
+          "info": {
+            "name": "Upload supporting documentation",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://api.one.healthsherpa.com/v1/enrollments/:enrollment_id/supporting_documentation",
+            "params": [
+              {
+                "name": "enrollment_id",
+                "value": "",
+                "type": "path",
+                "description": "Application id returned by `POST /v1/enrollments`."
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Approval-gated direct enrollment API for uploading a document that supports SEP eligibility for an off-exchange application. Some carriers require documentation for certain SEP reasons before coverage is effectuated. Use `GET /v1/enrollments/{enrollment_id}?product=ichra&exchange=off_exchange` to check `document_status`.\n\nSend the HealthSherpa ONE `context` object with `product = \"ichra\"` and `exchange = \"off_exchange\"` plus either `multipart/form-data` with a binary `file`, or `application/json"
+        },
+        {
+          "info": {
+            "name": "Fetch a direct enrollment application",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.one.healthsherpa.com/v1/enrollments/:enrollment_id",
+            "params": [
+              {
+                "name": "enrollment_id",
+                "value": "",
+                "type": "path",
+                "description": "Application id returned by `POST /v1/enrollments`."
+              },
+              {
+                "name": "product",
+                "value": "",
+                "type": "query",
+                "description": "Direct-enrollment product. Must be `ichra`."
+              },
+              {
+                "name": "exchange",
+                "value": "",
+                "type": "query",
+                "description": "Direct-enrollment routing channel. Must be `off_exchange`."
+              }
+            ]
+          },
+          "docs": "Approval-gated direct enrollment API for reading an application. Send `product=ichra` and `exchange=off_exchange` as required query parameters so HealthSherpa ONE can validate the direct-enrollment routing channel. HealthSherpa ONE returns the application details for the supplied id. `product` and `exchange` are the only supported read query parameters; `include_events`, `plan_year`, and other read-time query parameters are not supported. The application plan year is returned in the response. Se"
+        },
+        {
+          "info": {
+            "name": "Update a direct enrollment application",
+            "type": "http"
+          },
+          "http": {
+            "method": "PUT",
+            "url": "https://api.one.healthsherpa.com/v1/enrollments/:enrollment_id",
+            "params": [
+              {
+                "name": "enrollment_id",
+                "value": "",
+                "type": "path",
+                "description": "Application id returned by `POST /v1/enrollments`."
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Approval-gated direct enrollment API for updating an off-exchange application. Treat `PUT` as a full replacement-style update. Send the HealthSherpa ONE `context` object with `product = \"ichra\"`, `exchange = \"off_exchange\"`, and `plan_year` plus the full current application payload, including unchanged fields you want to preserve. When sending `applicants.primary`, include the full current primary applicant object because omitted primary fields may be cleared. Other products and exchanges are no"
+        }
+      ]
+    }
+  ],
+  "bundled": true
+}

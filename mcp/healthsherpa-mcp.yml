@@ -55,3 +55,9 @@ tools:
 - name: updateEnrollment
   description: Update a direct enrollment application
   source_operation: openapi/healthsherpa-one-openapi.json#updateEnrollment
+deployment:
+  mode: none
+  verified: derived
+  tools: 15
+  checked: '2026-08-12'
+  source: catalog MCP census

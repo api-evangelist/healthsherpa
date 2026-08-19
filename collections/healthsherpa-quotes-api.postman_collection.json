@@ -1,0 +1,624 @@
+{
+  "item": [
+    {
+      "id": "396b9190-ead8-48b9-8577-43da70194db3",
+      "name": "Quotes",
+      "description": {
+        "content": "",
+        "type": "text/plain"
+      },
+      "item": [
+        {
+          "id": "554cf262-c2ae-4c2c-b8a5-c036c2468e12",
+          "name": "Search plans for one coverage type",
+          "request": {
+            "name": "Search plans for one coverage type",
+            "description": {
+              "content": "Returns a homogeneous list of quote results for exactly one coverage_type. Send one request for one market and one coverage_type at a time.",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "v1",
+                "quotes"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "POST",
+            "auth": null,
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"context\": {\n    \"product\": \"<string>\",\n    \"exchange\": \"<string>\",\n    \"coverage_family\": \"<string>\",\n    \"coverage_type\": \"<string>\",\n    \"plan_year\": \"<integer>\"\n  },\n  \"location\": {\n    \"zip_code\": \"<string>\",\n    \"fips_code\": \"<string>\",\n    \"state\": \"<string>\"\n  },\n  \"household\": {\n    \"applicants\": [\n      {\n        \"member_id\": \"<string>\",\n        \"age\": \"<integer>\",\n        \"relationship\": \"<string>\",\n        \"uses_tobacco\": \"<boolean>\",\n        \"date_of_birth\": \"<date>\",\n        \"gender\": \"<string>\",\n        \"pregnant\": \"<boolean>\",\n        \"blind_or_disabled\": \"<boolean>\",\n        \"native_american\": \"<boolean>\"\n      }\n    ],\n    \"household_size\": \"<integer>\",\n    \"annual_income\": \"<number>\",\n    \"effective_date\": \"<date>\"\n  },\n  \"filters\": {\n    \"issuer_ids\": [\n      \"<string>\",\n      \"<string>\"\n    ],\n    \"premium_min\": \"<number>\",\n    \"premium_max\": \"<number>\",\n    \"effective_date\": \"<date>\",\n    \"network_types\": [\n      \"<string>\",\n      \"<string>\"\n    ],\n    \"medical\": {\n      \"metal_levels\": [\n        \"<string>\",\n        \"<string>\"\n      ],\n      \"plan_types\": [\n        \"<string>\",\n        \"<string>\"\n      ],\n      \"hsa_eligible\": \"<boolean>\",\n      \"standardized_only\": \"<boolean>\"\n    }\n  },\n  \"sort\": {\n    \"field\": \"<string>\",\n    \"direction\": \"<string>\"\n  },\n  \"page\": {\n    \"number\": 1,\n    \"size\": 20,\n    \"key_0\": \"string\"\n  },\n  \"include\": {}\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "id": "2f52443d-26a8-4e6d-a566-93520357ab00",
+              "name": "Quotes returned successfully.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v1",
+                    "quotes"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"context\": {\n    \"product\": \"aca\",\n    \"exchange\": \"on_exchange\",\n    \"coverage_family\": \"medical\",\n    \"coverage_type\": \"medical\",\n    \"plan_year\": 2026\n  },\n  \"location\": {\n    \"zip_code\": \"30301\",\n    \"fips_code\": \"13121\",\n    \"state\": \"GA\"\n  },\n  \"household\": {\n    \"household_size\": 1,\n    \"annual_income\": 52000,\n    \"effective_date\": \"2026-05-01\",\n    \"applicants\": [\n      {\n        \"member_id\": \"applicant-1\",\n        \"age\": 40,\n        \"date_of_birth\": \"1986-05-01\",\n        \"relationship\": \"primary\",\n        \"uses_tobacco\": false,\n        \"pregnant\": false,\n        \"blind_or_disabled\": false,\n        \"native_american\": false\n      }\n    ]\n  },\n  \"sort\": {\n    \"field\": \"premium\",\n    \"direction\": \"asc\"\n  },\n  \"page\": {\n    \"number\": 1,\n    \"size\": 20\n  }\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"plans\": [\n    {\n      \"plan_id\": \"string\",\n      \"coverage_family\": \"string\",\n      \"coverage_type\": \"string\",\n      \"name\": \"string\",\n      \"api_enrollable\": false,\n      \"context\": {\n        \"product\": \"aca\",\n        \"exchange\": \"on_exchange\",\n        \"coverage_family\": \"ancillary\",\n        \"coverage_type\": \"medical\",\n        \"plan_year\": 2109\n      },\n      \"issuer\": {\n        \"issuer_id\": \"string\",\n        \"name\": \"string\",\n        \"state\": \"AC\",\n        \"payment_phone\": \"string\",\n        \"customer_service_phone\": \"string\"\n      },\n      \"pricing\": {\n        \"gross_premium\": 4832.152003545216,\n        \"currency\": \"USD\",\n        \"ehb_premium\": 9915.172174356434,\n        \"max_aptc\": 463.7053965833848,\n        \"subsidy_applied\": 3714.8836606554246,\n        \"net_premium\": 8141.077373310131,\n        \"billing_period\": \"monthly\"\n      },\n      \"documents\": {\n        \"sbc_url\": \"https://zRGyeTMTVhRuDwayuaC.osvZAcduRL+kEInP8JKJOmyNoFE,DMxFiwPBwzHQ-q9VrDad+akoU+KiO9jz1CYnHj+onE\",\n        \"formulary_url\": \"http://WtSFgtWDwZUvwYfrCOlSobjKsznVTL.xmglFgE2EEHR-o8M6sSWr7Bd2p9EoVmoJ7srjTICf1L2nLgetw1-GpxHu\",\n        \"brochure_url\": \"https://RHuOTXFGFIyaH.ikUFIr91IltbuPEf-LKWg8wINr127YDSX0pYQdppbSTGvokrShlLHdHdXEuutNa\",\n        \"network_url\": \"http://qDvMvKj.kbf2mvE3aU6fZIz\",\n        \"payment_url\": \"http://k.hpeb4CgTzBpOcrm3WIEqs9EI+nA1JyvgzdaiveE.5j.nllD\"\n      },\n      \"details\": {\n        \"type\": \"supplemental_other\",\n        \"metal_level\": \"platinum\",\n        \"plan_type\": \"hmo\",\n        \"hsa_eligible\": false,\n        \"is_standardized\": true,\n        \"adult_dental\": true,\n        \"child_dental\": false,\n        \"deductible_individual\": 4413.400444073345,\n        \"deductible_family\": 3459.0652805829905,\n        \"moop_individual\": 4059.6928518006093,\n        \"moop_family\": 5085.767827977191,\n        \"csr_level\": \"csr_zero_cost\",\n        \"primary_care_summary\": \"string\",\n        \"specialist_summary\": \"string\",\n        \"urgent_care_summary\": \"string\",\n        \"generic_rx_summary\": \"string\"\n      },\n      \"release\": {\n        \"release_id\": \"string\",\n        \"plan_year\": 1970\n      },\n      \"variant_id\": \"string\",\n      \"external_plan_id\": \"string\",\n      \"display_name\": \"string\",\n      \"network\": {\n        \"network_id\": \"string\",\n        \"name\": \"string\",\n        \"type\": \"string\",\n        \"network_url\": \"http://cxiIgbXNHTwEnwlBv.ngzuuB7clr-v3l-BjzRQDieOEiB-1iKvthBkrc7yFLpg4V4fJN+vn5HCmkNc-yqqA\",\n        \"key_0\": false,\n        \"key_1\": 8392\n      },\n      \"availability\": {\n        \"state\": \"UC\",\n        \"service_area_id\": \"string\",\n        \"rating_area\": \"string\"\n      }\n    },\n    {\n      \"plan_id\": \"string\",\n      \"coverage_family\": \"string\",\n      \"coverage_type\": \"string\",\n      \"name\": \"string\",\n      \"api_enrollable\": true,\n      \"context\": {\n        \"product\": \"ichra\",\n        \"exchange\": \"off_exchange\",\n        \"coverage_family\": \"ancillary\",\n        \"coverage_type\": \"medical\",\n        \"plan_year\": 2294\n      },\n      \"issuer\": {\n        \"issuer_id\": \"string\",\n        \"name\": \"string\",\n        \"state\": \"DH\",\n        \"payment_phone\": \"string\",\n        \"customer_service_phone\": \"string\"\n      },\n      \"pricing\": {\n        \"gross_premium\": 6973.112142752113,\n        \"currency\": \"USD\",\n        \"ehb_premium\": 4892.898375198537,\n        \"max_aptc\": 146.7369530385254,\n        \"subsidy_applied\": 8783.328521073761,\n        \"net_premium\": 2374.046093066359,\n        \"billing_period\": \"monthly\"\n      },\n      \"documents\": {\n        \"sbc_url\": \"https://nmhOccaOshTeeZ.lvnN9ga22qVnDTws\",\n        \"formulary_url\": \"https://Tx.xuesW1QUgCULRvoUs\",\n        \"brochure_url\": \"https://D.daUBcui9Si-jo74tzi1i46E+tvmXkPnu4TNSvSm.8om-Y0mKgwYCP1LFLeG\",\n        \"network_url\": \"http://lsnypeDuGKjHlygyM.aipyKeAcCz+3K8piKrlo5.dazkc-3Uy4LkHV7LS8zUbFXNZJuZSXJcUOu\",\n        \"payment_url\": \"http://sydqdVCqj.wqYuzFGj.BFXV803MawCr3ee7+0huE3NBa9Zud8BUkwEsiPXO+hJr8wKzJtw-\",\n        \"key_0\": 7141.591246997816,\n        \"key_1\": 8218\n      },\n      \"details\": {\n        \"type\": \"supplemental_other\",\n        \"metal_level\": \"silver\",\n        \"plan_type\": \"pos\",\n        \"hsa_eligible\": true,\n        \"is_standardized\": false,\n        \"adult_dental\": false,\n        \"child_dental\": true,\n        \"deductible_individual\": 9961.979701539725,\n        \"deductible_family\": 7524.833033301787,\n        \"moop_individual\": 1487.52183425088,\n        \"moop_family\": 6220.436586839068,\n        \"csr_level\": \"off_exchange\",\n        \"primary_care_summary\": \"string\",\n        \"specialist_summary\": \"string\",\n        \"urgent_care_summary\": \"string\",\n        \"generic_rx_summary\": \"string\"\n      },\n      \"release\": {\n        \"release_id\": \"string\",\n        \"plan_year\": 3481\n      },\n      \"variant_id\": \"string\",\n      \"external_plan_id\": \"string\",\n      \"display_name\": \"string\",\n      \"network\": {\n        \"network_id\": \"string\",\n        \"name\": \"string\",\n        \"type\": \"string\",\n        \"network_url\": \"https://RKhjeEaT.noJqMGdEsLeUTrfKB.+vl4pJpqrktMvZSkp2P3ASezDtjl8AfwKOlo+wF\",\n        \"key_0\": 3779\n      },\n      \"availability\": {\n        \"state\": \"MB\",\n        \"service_area_id\": \"string\",\n        \"rating_area\": \"string\",\n        \"key_0\": 3942,\n        \"key_1\": \"string\"\n      }\n    }\n  ],\n  \"meta\": {\n    \"page_number\": 5298,\n    \"page_size\": 3478,\n    \"result_count\": 3838,\n    \"warnings\": [\n      \"string\",\n      \"string\"\n    ]\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "80443566-32e5-44dd-a1d4-11e80b9aa986",
+              "name": "Request validation failed. The response body's `error.details` map contains per-field messages when the backend produced the error; edge-generated 400s omit `details`.\n\nA malformed `Idempotency-Key` header is also rejected here with `code: idempotency_key_invalid`.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v1",
+                    "quotes"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"context\": {\n    \"product\": \"aca\",\n    \"exchange\": \"on_exchange\",\n    \"coverage_family\": \"medical\",\n    \"coverage_type\": \"medical\",\n    \"plan_year\": 2026\n  },\n  \"location\": {\n    \"zip_code\": \"30301\",\n    \"fips_code\": \"13121\",\n    \"state\": \"GA\"\n  },\n  \"household\": {\n    \"household_size\": 1,\n    \"annual_income\": 52000,\n    \"effective_date\": \"2026-05-01\",\n    \"applicants\": [\n      {\n        \"member_id\": \"applicant-1\",\n        \"age\": 40,\n        \"date_of_birth\": \"1986-05-01\",\n        \"relationship\": \"primary\",\n        \"uses_tobacco\": false,\n        \"pregnant\": false,\n        \"blind_or_disabled\": false,\n        \"native_american\": false\n      }\n    ]\n  },\n  \"sort\": {\n    \"field\": \"premium\",\n    \"direction\": \"asc\"\n  },\n  \"page\": {\n    \"number\": 1,\n    \"size\": 20\n  }\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"error\": {\n    \"code\": \"invalid_request\",\n    \"message\": \"Validation failed.\",\n    \"details\": {\n      \"zip_code\": [\n        \"ZIP code must be 5 digits\"\n      ]\n    }\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "eae485e9-44f5-4ea4-b4c9-b04d29366873",
+              "name": "The API key is missing, invalid, not authorized for this API, or the request was blocked at the API edge. Public API requests may receive this edge-generated response before the backend can return a runtime 401. When a request reaches the backend, 403 may also mean the developer account or integration is not in the state required for that operation. For `POST /v1/enrollment-sessions`, that operation documents its own flow-scoped 403 requirements (both flows require approved on-exchange enrollment access, plus `agent_assisted` OAuth link vs `self_service` deeplink agent ID) instead of using this shared response reference.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v1",
+                    "quotes"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"context\": {\n    \"product\": \"aca\",\n    \"exchange\": \"on_exchange\",\n    \"coverage_family\": \"medical\",\n    \"coverage_type\": \"medical\",\n    \"plan_year\": 2026\n  },\n  \"location\": {\n    \"zip_code\": \"30301\",\n    \"fips_code\": \"13121\",\n    \"state\": \"GA\"\n  },\n  \"household\": {\n    \"household_size\": 1,\n    \"annual_income\": 52000,\n    \"effective_date\": \"2026-05-01\",\n    \"applicants\": [\n      {\n        \"member_id\": \"applicant-1\",\n        \"age\": 40,\n        \"date_of_birth\": \"1986-05-01\",\n        \"relationship\": \"primary\",\n        \"uses_tobacco\": false,\n        \"pregnant\": false,\n        \"blind_or_disabled\": false,\n        \"native_american\": false\n      }\n    ]\n  },\n  \"sort\": {\n    \"field\": \"premium\",\n    \"direction\": \"asc\"\n  },\n  \"page\": {\n    \"number\": 1,\n    \"size\": 20\n  }\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Forbidden",
+              "code": 403,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"error\": {\n    \"code\": \"forbidden\",\n    \"message\": \"The supplied API key is missing, invalid, or not authorized for this API.\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "8e15e279-71b9-4314-95ac-5beacfaf4b1e",
+              "name": "The request body exceeded the maximum size accepted by the API edge.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v1",
+                    "quotes"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"context\": {\n    \"product\": \"aca\",\n    \"exchange\": \"on_exchange\",\n    \"coverage_family\": \"medical\",\n    \"coverage_type\": \"medical\",\n    \"plan_year\": 2026\n  },\n  \"location\": {\n    \"zip_code\": \"30301\",\n    \"fips_code\": \"13121\",\n    \"state\": \"GA\"\n  },\n  \"household\": {\n    \"household_size\": 1,\n    \"annual_income\": 52000,\n    \"effective_date\": \"2026-05-01\",\n    \"applicants\": [\n      {\n        \"member_id\": \"applicant-1\",\n        \"age\": 40,\n        \"date_of_birth\": \"1986-05-01\",\n        \"relationship\": \"primary\",\n        \"uses_tobacco\": false,\n        \"pregnant\": false,\n        \"blind_or_disabled\": false,\n        \"native_american\": false\n      }\n    ]\n  },\n  \"sort\": {\n    \"field\": \"premium\",\n    \"direction\": \"asc\"\n  },\n  \"page\": {\n    \"number\": 1,\n    \"size\": 20\n  }\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Request Entity Too Large",
+              "code": 413,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"error\": {\n    \"code\": \"payload_too_large\",\n    \"message\": \"The request payload exceeded the maximum allowed size.\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "c6919f32-0d35-4b35-8307-ccecdaaabbf6",
+              "name": "The request `Content-Type` is not supported by the endpoint.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v1",
+                    "quotes"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"context\": {\n    \"product\": \"aca\",\n    \"exchange\": \"on_exchange\",\n    \"coverage_family\": \"medical\",\n    \"coverage_type\": \"medical\",\n    \"plan_year\": 2026\n  },\n  \"location\": {\n    \"zip_code\": \"30301\",\n    \"fips_code\": \"13121\",\n    \"state\": \"GA\"\n  },\n  \"household\": {\n    \"household_size\": 1,\n    \"annual_income\": 52000,\n    \"effective_date\": \"2026-05-01\",\n    \"applicants\": [\n      {\n        \"member_id\": \"applicant-1\",\n        \"age\": 40,\n        \"date_of_birth\": \"1986-05-01\",\n        \"relationship\": \"primary\",\n        \"uses_tobacco\": false,\n        \"pregnant\": false,\n        \"blind_or_disabled\": false,\n        \"native_american\": false\n      }\n    ]\n  },\n  \"sort\": {\n    \"field\": \"premium\",\n    \"direction\": \"asc\"\n  },\n  \"page\": {\n    \"number\": 1,\n    \"size\": 20\n  }\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Unsupported Media Type",
+              "code": 415,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"error\": {\n    \"code\": \"unsupported_media_type\",\n    \"message\": \"The request Content-Type is not supported by this endpoint.\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "4990282b-7055-48b4-a3ed-e7c31b4b435a",
+              "name": "Rate limit exceeded. Clients should back off and retry after the delay advertised in the Retry-After header.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v1",
+                    "quotes"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"context\": {\n    \"product\": \"aca\",\n    \"exchange\": \"on_exchange\",\n    \"coverage_family\": \"medical\",\n    \"coverage_type\": \"medical\",\n    \"plan_year\": 2026\n  },\n  \"location\": {\n    \"zip_code\": \"30301\",\n    \"fips_code\": \"13121\",\n    \"state\": \"GA\"\n  },\n  \"household\": {\n    \"household_size\": 1,\n    \"annual_income\": 52000,\n    \"effective_date\": \"2026-05-01\",\n    \"applicants\": [\n      {\n        \"member_id\": \"applicant-1\",\n        \"age\": 40,\n        \"date_of_birth\": \"1986-05-01\",\n        \"relationship\": \"primary\",\n        \"uses_tobacco\": false,\n        \"pregnant\": false,\n        \"blind_or_disabled\": false,\n        \"native_american\": false\n      }\n    ]\n  },\n  \"sort\": {\n    \"field\": \"premium\",\n    \"direction\": \"asc\"\n  },\n  \"page\": {\n    \"number\": 1,\n    \"size\": 20\n  }\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Too Many Requests",
+              "code": 429,
+              "header": [
+                {
+                  "disabled": false,
+                  "description": "Number of seconds the client should wait before retrying.",
+                  "key": "Retry-After",
+                  "value": "4747"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"error\": {\n    \"code\": \"rate_limited\",\n    \"message\": \"Request rate limit exceeded. Please slow down and retry shortly.\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "fb1b026a-b02e-4b2e-b920-08b45d82796b",
+              "name": "An unexpected error occurred.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v1",
+                    "quotes"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"context\": {\n    \"product\": \"aca\",\n    \"exchange\": \"on_exchange\",\n    \"coverage_family\": \"medical\",\n    \"coverage_type\": \"medical\",\n    \"plan_year\": 2026\n  },\n  \"location\": {\n    \"zip_code\": \"30301\",\n    \"fips_code\": \"13121\",\n    \"state\": \"GA\"\n  },\n  \"household\": {\n    \"household_size\": 1,\n    \"annual_income\": 52000,\n    \"effective_date\": \"2026-05-01\",\n    \"applicants\": [\n      {\n        \"member_id\": \"applicant-1\",\n        \"age\": 40,\n        \"date_of_birth\": \"1986-05-01\",\n        \"relationship\": \"primary\",\n        \"uses_tobacco\": false,\n        \"pregnant\": false,\n        \"blind_or_disabled\": false,\n        \"native_american\": false\n      }\n    ]\n  },\n  \"sort\": {\n    \"field\": \"premium\",\n    \"direction\": \"asc\"\n  },\n  \"page\": {\n    \"number\": 1,\n    \"size\": 20\n  }\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Internal Server Error",
+              "code": 500,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"error\": {\n    \"code\": \"internal_error\",\n    \"message\": \"An unexpected error occurred.\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "c0327f5a-76af-496e-a12e-6f8db6cd1716",
+              "name": "The API edge received an invalid response from the backend.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v1",
+                    "quotes"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"context\": {\n    \"product\": \"aca\",\n    \"exchange\": \"on_exchange\",\n    \"coverage_family\": \"medical\",\n    \"coverage_type\": \"medical\",\n    \"plan_year\": 2026\n  },\n  \"location\": {\n    \"zip_code\": \"30301\",\n    \"fips_code\": \"13121\",\n    \"state\": \"GA\"\n  },\n  \"household\": {\n    \"household_size\": 1,\n    \"annual_income\": 52000,\n    \"effective_date\": \"2026-05-01\",\n    \"applicants\": [\n      {\n        \"member_id\": \"applicant-1\",\n        \"age\": 40,\n        \"date_of_birth\": \"1986-05-01\",\n        \"relationship\": \"primary\",\n        \"uses_tobacco\": false,\n        \"pregnant\": false,\n        \"blind_or_disabled\": false,\n        \"native_american\": false\n      }\n    ]\n  },\n  \"sort\": {\n    \"field\": \"premium\",\n    \"direction\": \"asc\"\n  },\n  \"page\": {\n    \"number\": 1,\n    \"size\": 20\n  }\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Bad Gateway",
+              "code": 502,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"error\": {\n    \"code\": \"bad_gateway\",\n    \"message\": \"The API edge received an invalid response from the backend. Please try again later.\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "198cbe4b-4813-462a-ad72-62392c89dd9b",
+              "name": "The API is temporarily unable to serve the request. This may be returned by the API edge when the backend is unhealthy, or by the backend when an upstream catalog, quoting, or lookup service is unavailable.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v1",
+                    "quotes"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"context\": {\n    \"product\": \"aca\",\n    \"exchange\": \"on_exchange\",\n    \"coverage_family\": \"medical\",\n    \"coverage_type\": \"medical\",\n    \"plan_year\": 2026\n  },\n  \"location\": {\n    \"zip_code\": \"30301\",\n    \"fips_code\": \"13121\",\n    \"state\": \"GA\"\n  },\n  \"household\": {\n    \"household_size\": 1,\n    \"annual_income\": 52000,\n    \"effective_date\": \"2026-05-01\",\n    \"applicants\": [\n      {\n        \"member_id\": \"applicant-1\",\n        \"age\": 40,\n        \"date_of_birth\": \"1986-05-01\",\n        \"relationship\": \"primary\",\n        \"uses_tobacco\": false,\n        \"pregnant\": false,\n        \"blind_or_disabled\": false,\n        \"native_american\": false\n      }\n    ]\n  },\n  \"sort\": {\n    \"field\": \"premium\",\n    \"direction\": \"asc\"\n  },\n  \"page\": {\n    \"number\": 1,\n    \"size\": 20\n  }\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Service Unavailable",
+              "code": 503,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"error\": {\n    \"code\": \"service_unavailable\",\n    \"message\": \"The service is temporarily unavailable. Please try again later.\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "9d5b757e-ad5a-4575-828f-6693332e6d2d",
+              "name": "The API edge did not receive a timely response from the backend.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v1",
+                    "quotes"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"context\": {\n    \"product\": \"aca\",\n    \"exchange\": \"on_exchange\",\n    \"coverage_family\": \"medical\",\n    \"coverage_type\": \"medical\",\n    \"plan_year\": 2026\n  },\n  \"location\": {\n    \"zip_code\": \"30301\",\n    \"fips_code\": \"13121\",\n    \"state\": \"GA\"\n  },\n  \"household\": {\n    \"household_size\": 1,\n    \"annual_income\": 52000,\n    \"effective_date\": \"2026-05-01\",\n    \"applicants\": [\n      {\n        \"member_id\": \"applicant-1\",\n        \"age\": 40,\n        \"date_of_birth\": \"1986-05-01\",\n        \"relationship\": \"primary\",\n        \"uses_tobacco\": false,\n        \"pregnant\": false,\n        \"blind_or_disabled\": false,\n        \"native_american\": false\n      }\n    ]\n  },\n  \"sort\": {\n    \"field\": \"premium\",\n    \"direction\": \"asc\"\n  },\n  \"page\": {\n    \"number\": 1,\n    \"size\": 20\n  }\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Gateway Timeout",
+              "code": 504,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"error\": {\n    \"code\": \"gateway_timeout\",\n    \"message\": \"The API edge did not receive a timely response from the backend. Please try again later.\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        }
+      ],
+      "event": []
+    }
+  ],
+  "event": [],
+  "variable": [
+    {
+      "type": "string",
+      "value": "https://api.one.healthsherpa.com",
+      "key": "baseUrl"
+    }
+  ],
+  "auth": {
+    "type": "apikey",
+    "apikey": [
+      {
+        "key": "key",
+        "value": "x-api-key"
+      },
+      {
+        "key": "value",
+        "value": "{{apiKey}}"
+      },
+      {
+        "key": "in",
+        "value": "header"
+      }
+    ]
+  },
+  "info": {
+    "_postman_id": "5b6a7297-83b6-4a0c-b133-2405ce3edfef",
+    "name": "HealthSherpa Public Enrollment Sessions Quotes API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": {
+      "content": "Machine-readable contract for the currently available public HealthSherpa endpoints: GET /v1/ping, GET /v1/reference/counties, GET /v1/reference/issuers, GET /v1/reference/providers, POST /v1/quotes, the approval-gated POST /v1/enrollment-sessions, and the approval-gated direct enrollment endpoints GET /v1/enrollments, POST /v1/enrollments, PUT /v1/enrollments/{enrollment_id}, GET /v1/enrollments/{enrollment_id}, POST /v1/enrollments/{enrollment_id}/cancellations, POST /v1/enrollments/{enrollment_id}/terminations, POST /v1/enrollments/{enrollment_id}/submissions, GET /v1/enrollments/{enrollment_id}/payment_redirect, and POST /v1/enrollments/{enrollment_id}/supporting_documentation. Object schemas remain additive and clients should ignore response fields they do not recognize.\n\nMost HealthSherpa-owned errors follow the unified `ErrorResponse` schema: `{ \"error\": { \"code\": string, \"message\": string, \"details\"?: object } }`. The direct enrollment endpoints instead return service failures as a top-level `errors[]` array: `{ \"errors\": [ { \"code\": string, \"message\": string, \"field\"?: string } ] }`. Edge-generated failures (API Gateway and WAF, before a request reaches the service) always use the unified `ErrorResponse` envelope, including on the direct enrollment endpoints — most notably a missing or invalid API key (`403 forbidden`).",
+      "type": "text/plain"
+    }
+  }
+}

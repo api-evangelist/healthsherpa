@@ -1,0 +1,1693 @@
+{
+  "item": [
+    {
+      "id": "fd4ed4d4-a15d-4f02-814c-5c9cbdb29c9b",
+      "name": "Reference",
+      "description": {
+        "content": "",
+        "type": "text/plain"
+      },
+      "item": [
+        {
+          "id": "630813b0-e6df-4f3f-b533-903ad34d9d8a",
+          "name": "List counties for a ZIP code",
+          "request": {
+            "name": "List counties for a ZIP code",
+            "description": {
+              "content": "Returns the counties that overlap the supplied ZIP code. A ZIP code can cross state lines; each returned county's `state` is the canonical state for its `fips_code`. Use the selected fips_code in subsequent quote requests.",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "v1",
+                "reference",
+                "counties"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [
+                {
+                  "disabled": false,
+                  "key": "zip_code",
+                  "value": "<string>",
+                  "description": "(Required) Five-digit ZIP code to resolve."
+                }
+              ],
+              "variable": []
+            },
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "GET",
+            "auth": null
+          },
+          "response": [
+            {
+              "id": "1383b811-2040-49dd-91e6-52b510205f9d",
+              "name": "One or more counties found for the ZIP code.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v1",
+                    "reference",
+                    "counties"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [
+                    {
+                      "key": "zip_code",
+                      "value": "<string>"
+                    }
+                  ],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"counties\": [\n    {\n      \"fips_code\": \"12086\",\n      \"name\": \"Miami-Dade County\",\n      \"state\": \"FL\"\n    }\n  ]\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "ab1d148b-dfb6-403b-8d33-2bf134ab0bfb",
+              "name": "Request validation failed. The response body's `error.details` map contains per-field messages when the backend produced the error; edge-generated 400s omit `details`.\n\nA malformed `Idempotency-Key` header is also rejected here with `code: idempotency_key_invalid`.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v1",
+                    "reference",
+                    "counties"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [
+                    {
+                      "key": "zip_code",
+                      "value": "<string>"
+                    }
+                  ],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"error\": {\n    \"code\": \"invalid_request\",\n    \"message\": \"Validation failed.\",\n    \"details\": {\n      \"zip_code\": [\n        \"ZIP code must be 5 digits\"\n      ]\n    }\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "c8b588e7-f31e-4358-9dcc-3d7bdb0601a7",
+              "name": "The API key is missing, invalid, not authorized for this API, or the request was blocked at the API edge. Public API requests may receive this edge-generated response before the backend can return a runtime 401. When a request reaches the backend, 403 may also mean the developer account or integration is not in the state required for that operation. For `POST /v1/enrollment-sessions`, that operation documents its own flow-scoped 403 requirements (both flows require approved on-exchange enrollment access, plus `agent_assisted` OAuth link vs `self_service` deeplink agent ID) instead of using this shared response reference.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v1",
+                    "reference",
+                    "counties"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [
+                    {
+                      "key": "zip_code",
+                      "value": "<string>"
+                    }
+                  ],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Forbidden",
+              "code": 403,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"error\": {\n    \"code\": \"forbidden\",\n    \"message\": \"The supplied API key is missing, invalid, or not authorized for this API.\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "5c4d5e07-80e2-46ef-a603-601b3de893db",
+              "name": "The requested resource could not be found. Emitted by the backend when no supported data matches the request (for example, no counties for a ZIP), and by the API edge for unknown paths.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v1",
+                    "reference",
+                    "counties"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [
+                    {
+                      "key": "zip_code",
+                      "value": "<string>"
+                    }
+                  ],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Not Found",
+              "code": 404,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"error\": {\n    \"code\": \"not_found\",\n    \"message\": \"No counties found for ZIP 12345.\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "e37d957b-bdef-4707-b570-907855ee791f",
+              "name": "Rate limit exceeded. Clients should back off and retry after the delay advertised in the Retry-After header.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v1",
+                    "reference",
+                    "counties"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [
+                    {
+                      "key": "zip_code",
+                      "value": "<string>"
+                    }
+                  ],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Too Many Requests",
+              "code": 429,
+              "header": [
+                {
+                  "disabled": false,
+                  "description": "Number of seconds the client should wait before retrying.",
+                  "key": "Retry-After",
+                  "value": "1039"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"error\": {\n    \"code\": \"rate_limited\",\n    \"message\": \"Request rate limit exceeded. Please slow down and retry shortly.\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "20f16fa3-6cdd-41a3-b18f-9a36cbfef626",
+              "name": "An unexpected error occurred.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v1",
+                    "reference",
+                    "counties"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [
+                    {
+                      "key": "zip_code",
+                      "value": "<string>"
+                    }
+                  ],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Internal Server Error",
+              "code": 500,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"error\": {\n    \"code\": \"internal_error\",\n    \"message\": \"An unexpected error occurred.\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "7edef956-ecf1-4d3d-92df-f6c13adb1e3c",
+              "name": "The API edge received an invalid response from the backend.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v1",
+                    "reference",
+                    "counties"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [
+                    {
+                      "key": "zip_code",
+                      "value": "<string>"
+                    }
+                  ],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Bad Gateway",
+              "code": 502,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"error\": {\n    \"code\": \"bad_gateway\",\n    \"message\": \"The API edge received an invalid response from the backend. Please try again later.\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "844a0cfd-592a-443b-bab5-b987656a174f",
+              "name": "The API is temporarily unable to serve the request. This may be returned by the API edge when the backend is unhealthy, or by the backend when an upstream catalog, quoting, or lookup service is unavailable.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v1",
+                    "reference",
+                    "counties"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [
+                    {
+                      "key": "zip_code",
+                      "value": "<string>"
+                    }
+                  ],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Service Unavailable",
+              "code": 503,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"error\": {\n    \"code\": \"service_unavailable\",\n    \"message\": \"The service is temporarily unavailable. Please try again later.\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "fed8c2c6-4d32-4c1d-a770-188473000059",
+              "name": "The API edge did not receive a timely response from the backend.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v1",
+                    "reference",
+                    "counties"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [
+                    {
+                      "key": "zip_code",
+                      "value": "<string>"
+                    }
+                  ],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Gateway Timeout",
+              "code": 504,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"error\": {\n    \"code\": \"gateway_timeout\",\n    \"message\": \"The API edge did not receive a timely response from the backend. Please try again later.\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "d82620b1-ca44-41df-a070-09ec77ac70a6",
+          "name": "List QHP issuers active in a state",
+          "request": {
+            "name": "List QHP issuers active in a state",
+            "description": {
+              "content": "Returns the QHP issuers active in the requested state and plan year. Each entry combines a sortable display name (issuer marketing name when present, legal name otherwise) with the canonical 5-digit HIOS issuer ID for use in subsequent quote filters.\n\n**Plan year:** the optional `plan_year` query parameter pins the lookup to a specific year and defaults to the current ACA plan year (open enrollment for 2027 begins November 1 2026). Specify `plan_year` explicitly when reconciling enrollments from a prior year or when shopping the next year before the rollover.\n\n**Response ordering:** entries are sorted by `name` (case-insensitive) and then by `hios_issuer_id` as a stable tiebreaker. Clients can iterate the array directly without re-sorting.",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "v1",
+                "reference",
+                "issuers"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [
+                {
+                  "disabled": false,
+                  "key": "state",
+                  "value": "<string>",
+                  "description": "(Required) Two-letter uppercase US state code (e.g. `FL`). Lowercase values are rejected with `400 invalid_request` — clients must upcase before sending."
+                },
+                {
+                  "disabled": false,
+                  "key": "plan_year",
+                  "value": "<integer>",
+                  "description": "ACA plan year to scope the issuer list to. Defaults to the current ACA plan year when omitted."
+                }
+              ],
+              "variable": []
+            },
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "GET",
+            "auth": null
+          },
+          "response": [
+            {
+              "id": "a590fe39-1c80-4b9e-bde9-707e9cf7e716",
+              "name": "One or more issuers found for the state.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v1",
+                    "reference",
+                    "issuers"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [
+                    {
+                      "key": "state",
+                      "value": "FL"
+                    },
+                    {
+                      "key": "plan_year",
+                      "value": "2026"
+                    }
+                  ],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"issuers\": [\n    {\n      \"name\": \"Gulf Coast Coverage Co.\",\n      \"hios_issuer_id\": \"33333\"\n    },\n    {\n      \"name\": \"Sunshine State Health\",\n      \"hios_issuer_id\": \"12345\"\n    }\n  ]\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "6c587335-322b-4598-8163-02d9fcb74716",
+              "name": "Request validation failed. The response body's `error.details` map contains per-field messages when the backend produced the error; edge-generated 400s omit `details`.\n\nA malformed `Idempotency-Key` header is also rejected here with `code: idempotency_key_invalid`.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v1",
+                    "reference",
+                    "issuers"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [
+                    {
+                      "key": "state",
+                      "value": "FL"
+                    },
+                    {
+                      "key": "plan_year",
+                      "value": "2026"
+                    }
+                  ],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"error\": {\n    \"code\": \"invalid_request\",\n    \"message\": \"Validation failed.\",\n    \"details\": {\n      \"zip_code\": [\n        \"ZIP code must be 5 digits\"\n      ]\n    }\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "ffd9c988-578f-44e1-9448-90e26083a6c5",
+              "name": "The API key is missing, invalid, not authorized for this API, or the request was blocked at the API edge. Public API requests may receive this edge-generated response before the backend can return a runtime 401. When a request reaches the backend, 403 may also mean the developer account or integration is not in the state required for that operation. For `POST /v1/enrollment-sessions`, that operation documents its own flow-scoped 403 requirements (both flows require approved on-exchange enrollment access, plus `agent_assisted` OAuth link vs `self_service` deeplink agent ID) instead of using this shared response reference.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v1",
+                    "reference",
+                    "issuers"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [
+                    {
+                      "key": "state",
+                      "value": "FL"
+                    },
+                    {
+                      "key": "plan_year",
+                      "value": "2026"
+                    }
+                  ],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Forbidden",
+              "code": 403,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"error\": {\n    \"code\": \"forbidden\",\n    \"message\": \"The supplied API key is missing, invalid, or not authorized for this API.\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "c7784d7e-0ad4-4824-bcef-e4175c959226",
+              "name": "The requested resource could not be found. Emitted by the backend when no supported data matches the request (for example, no counties for a ZIP), and by the API edge for unknown paths.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v1",
+                    "reference",
+                    "issuers"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [
+                    {
+                      "key": "state",
+                      "value": "FL"
+                    },
+                    {
+                      "key": "plan_year",
+                      "value": "2026"
+                    }
+                  ],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Not Found",
+              "code": 404,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"error\": {\n    \"code\": \"not_found\",\n    \"message\": \"No counties found for ZIP 12345.\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "2619b5f3-4cb5-4507-bfb3-f773c838d346",
+              "name": "Rate limit exceeded. Clients should back off and retry after the delay advertised in the Retry-After header.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v1",
+                    "reference",
+                    "issuers"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [
+                    {
+                      "key": "state",
+                      "value": "FL"
+                    },
+                    {
+                      "key": "plan_year",
+                      "value": "2026"
+                    }
+                  ],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Too Many Requests",
+              "code": 429,
+              "header": [
+                {
+                  "disabled": false,
+                  "description": "Number of seconds the client should wait before retrying.",
+                  "key": "Retry-After",
+                  "value": "1039"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"error\": {\n    \"code\": \"rate_limited\",\n    \"message\": \"Request rate limit exceeded. Please slow down and retry shortly.\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "c7d02131-10df-4fdc-add4-d22f248d56a3",
+              "name": "An unexpected error occurred.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v1",
+                    "reference",
+                    "issuers"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [
+                    {
+                      "key": "state",
+                      "value": "FL"
+                    },
+                    {
+                      "key": "plan_year",
+                      "value": "2026"
+                    }
+                  ],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Internal Server Error",
+              "code": 500,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"error\": {\n    \"code\": \"internal_error\",\n    \"message\": \"An unexpected error occurred.\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "debf7af4-d845-4017-8867-8fc7d4fc8ca9",
+              "name": "The API edge received an invalid response from the backend.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v1",
+                    "reference",
+                    "issuers"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [
+                    {
+                      "key": "state",
+                      "value": "FL"
+                    },
+                    {
+                      "key": "plan_year",
+                      "value": "2026"
+                    }
+                  ],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Bad Gateway",
+              "code": 502,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"error\": {\n    \"code\": \"bad_gateway\",\n    \"message\": \"The API edge received an invalid response from the backend. Please try again later.\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "8d51fd2d-7c89-425a-9681-8bb30f11072c",
+              "name": "The API is temporarily unable to serve the request. This may be returned by the API edge when the backend is unhealthy, or by the backend when an upstream catalog, quoting, or lookup service is unavailable.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v1",
+                    "reference",
+                    "issuers"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [
+                    {
+                      "key": "state",
+                      "value": "FL"
+                    },
+                    {
+                      "key": "plan_year",
+                      "value": "2026"
+                    }
+                  ],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Service Unavailable",
+              "code": 503,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"error\": {\n    \"code\": \"service_unavailable\",\n    \"message\": \"The service is temporarily unavailable. Please try again later.\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "c1922ba9-7284-46d2-bc85-e352cdb5ed74",
+              "name": "The API edge did not receive a timely response from the backend.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v1",
+                    "reference",
+                    "issuers"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [
+                    {
+                      "key": "state",
+                      "value": "FL"
+                    },
+                    {
+                      "key": "plan_year",
+                      "value": "2026"
+                    }
+                  ],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Gateway Timeout",
+              "code": 504,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"error\": {\n    \"code\": \"gateway_timeout\",\n    \"message\": \"The API edge did not receive a timely response from the backend. Please try again later.\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "564ac6e1-9ffe-45a3-9391-04a03a5640f5",
+          "name": "Search healthcare providers by name near a ZIP code",
+          "request": {
+            "name": "Search healthcare providers by name near a ZIP code",
+            "description": {
+              "content": "Searches healthcare providers (individuals and facilities) by name near a ZIP code and returns paginated results with NPI and address data. This is a search-only endpoint; there is no \"list all providers\" mode.\n\nUse the returned 10-digit `npi` values when building provider selections, for example the `providers` field on an enrollment session.\n\n**Channel:** the required `exchange` parameter selects the marketplace channel (`on_exchange` or `off_exchange`).\n\n**Pagination:** results are paginated with the nested `page[number]` and `page[size]` query parameters, mirroring the quoting endpoint's `page` object. `page[number]` defaults to 1 (values below 1 are treated as 1) and `page[size]` accepts 1 to 50, defaulting to 50 (values outside the range resolve to 50). Pagination metadata is returned under `meta` (`page_number`, `page_size`, `result_count`). An empty search returns `providers: []` with `result_count` 0.",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "v1",
+                "reference",
+                "providers"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [
+                {
+                  "disabled": false,
+                  "key": "query",
+                  "value": "<string>",
+                  "description": "(Required) Provider or facility name search term."
+                },
+                {
+                  "disabled": false,
+                  "key": "zip_code",
+                  "value": "<string>",
+                  "description": "(Required) Five-digit ZIP code used for the geographic (near-ZIP) search."
+                },
+                {
+                  "disabled": false,
+                  "key": "exchange",
+                  "value": "<string>",
+                  "description": "(Required) Marketplace channel to search. Required. One of `on_exchange` or `off_exchange`."
+                },
+                {
+                  "disabled": false,
+                  "key": "page[number]",
+                  "value": "1",
+                  "description": "Page number (mirrors quoting's page.number). Defaults to 1; values below 1 are treated as 1."
+                },
+                {
+                  "disabled": false,
+                  "key": "page[size]",
+                  "value": "50",
+                  "description": "Results per page (mirrors quoting's page.size), from 1 to 50. Defaults to 50; values outside this range resolve to 50."
+                }
+              ],
+              "variable": []
+            },
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "GET",
+            "auth": null
+          },
+          "response": [
+            {
+              "id": "6c6ff9cf-1147-49c0-9c3c-59dfec664fe7",
+              "name": "Provider search results for the current page. An empty search returns an empty `providers` array.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v1",
+                    "reference",
+                    "providers"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [
+                    {
+                      "key": "query",
+                      "value": "Smith"
+                    },
+                    {
+                      "key": "zip_code",
+                      "value": "85001"
+                    },
+                    {
+                      "key": "exchange",
+                      "value": "on_exchange"
+                    },
+                    {
+                      "key": "page[number]",
+                      "value": "1"
+                    },
+                    {
+                      "key": "page[size]",
+                      "value": "50"
+                    }
+                  ],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"providers\": [\n    {\n      \"first_name\": \"John\",\n      \"last_name\": \"Smith\",\n      \"organization_name\": null,\n      \"display_name\": \"John Smith, MD\",\n      \"credential\": \"MD\",\n      \"entity_type\": \"individual\",\n      \"npi\": \"1972113918\",\n      \"specialty\": \"Family Medicine\",\n      \"specialization\": \"General Practice\",\n      \"address_line_1\": \"123 Main St\",\n      \"city\": \"Phoenix\",\n      \"state\": \"AZ\",\n      \"zip_code\": \"85001\"\n    }\n  ],\n  \"meta\": {\n    \"page_number\": 1,\n    \"page_size\": 50,\n    \"result_count\": 1\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "36dbd54a-9bbf-4523-b422-8e6f5d4894a2",
+              "name": "Request validation failed. The response body's `error.details` map contains per-field messages when the backend produced the error; edge-generated 400s omit `details`.\n\nA malformed `Idempotency-Key` header is also rejected here with `code: idempotency_key_invalid`.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v1",
+                    "reference",
+                    "providers"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [
+                    {
+                      "key": "query",
+                      "value": "Smith"
+                    },
+                    {
+                      "key": "zip_code",
+                      "value": "85001"
+                    },
+                    {
+                      "key": "exchange",
+                      "value": "on_exchange"
+                    },
+                    {
+                      "key": "page[number]",
+                      "value": "1"
+                    },
+                    {
+                      "key": "page[size]",
+                      "value": "50"
+                    }
+                  ],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"error\": {\n    \"code\": \"invalid_request\",\n    \"message\": \"Validation failed.\",\n    \"details\": {\n      \"zip_code\": [\n        \"ZIP code must be 5 digits\"\n      ]\n    }\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "7f3c26a8-bb08-47ca-b13b-9361df6e5981",
+              "name": "The API key is missing, invalid, not authorized for this API, or the request was blocked at the API edge. Public API requests may receive this edge-generated response before the backend can return a runtime 401. When a request reaches the backend, 403 may also mean the developer account or integration is not in the state required for that operation. For `POST /v1/enrollment-sessions`, that operation documents its own flow-scoped 403 requirements (both flows require approved on-exchange enrollment access, plus `agent_assisted` OAuth link vs `self_service` deeplink agent ID) instead of using this shared response reference.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v1",
+                    "reference",
+                    "providers"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [
+                    {
+                      "key": "query",
+                      "value": "Smith"
+                    },
+                    {
+                      "key": "zip_code",
+                      "value": "85001"
+                    },
+                    {
+                      "key": "exchange",
+                      "value": "on_exchange"
+                    },
+                    {
+                      "key": "page[number]",
+                      "value": "1"
+                    },
+                    {
+                      "key": "page[size]",
+                      "value": "50"
+                    }
+                  ],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Forbidden",
+              "code": 403,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"error\": {\n    \"code\": \"forbidden\",\n    \"message\": \"The supplied API key is missing, invalid, or not authorized for this API.\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "7c3c0d29-fc46-473a-ac0b-ad9b10c0cffc",
+              "name": "Rate limit exceeded. Clients should back off and retry after the delay advertised in the Retry-After header.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v1",
+                    "reference",
+                    "providers"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [
+                    {
+                      "key": "query",
+                      "value": "Smith"
+                    },
+                    {
+                      "key": "zip_code",
+                      "value": "85001"
+                    },
+                    {
+                      "key": "exchange",
+                      "value": "on_exchange"
+                    },
+                    {
+                      "key": "page[number]",
+                      "value": "1"
+                    },
+                    {
+                      "key": "page[size]",
+                      "value": "50"
+                    }
+                  ],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Too Many Requests",
+              "code": 429,
+              "header": [
+                {
+                  "disabled": false,
+                  "description": "Number of seconds the client should wait before retrying.",
+                  "key": "Retry-After",
+                  "value": "1039"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"error\": {\n    \"code\": \"rate_limited\",\n    \"message\": \"Request rate limit exceeded. Please slow down and retry shortly.\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "5aceb48e-2c37-4376-a497-fa3631c30a7a",
+              "name": "An unexpected error occurred.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v1",
+                    "reference",
+                    "providers"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [
+                    {
+                      "key": "query",
+                      "value": "Smith"
+                    },
+                    {
+                      "key": "zip_code",
+                      "value": "85001"
+                    },
+                    {
+                      "key": "exchange",
+                      "value": "on_exchange"
+                    },
+                    {
+                      "key": "page[number]",
+                      "value": "1"
+                    },
+                    {
+                      "key": "page[size]",
+                      "value": "50"
+                    }
+                  ],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Internal Server Error",
+              "code": 500,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"error\": {\n    \"code\": \"internal_error\",\n    \"message\": \"An unexpected error occurred.\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "163edab5-d670-4753-b03b-24d162dd60c6",
+              "name": "The API edge received an invalid response from the backend.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v1",
+                    "reference",
+                    "providers"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [
+                    {
+                      "key": "query",
+                      "value": "Smith"
+                    },
+                    {
+                      "key": "zip_code",
+                      "value": "85001"
+                    },
+                    {
+                      "key": "exchange",
+                      "value": "on_exchange"
+                    },
+                    {
+                      "key": "page[number]",
+                      "value": "1"
+                    },
+                    {
+                      "key": "page[size]",
+                      "value": "50"
+                    }
+                  ],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Bad Gateway",
+              "code": 502,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"error\": {\n    \"code\": \"bad_gateway\",\n    \"message\": \"The API edge received an invalid response from the backend. Please try again later.\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "6b6c3b21-602c-476f-bfc3-1c6abf1a7059",
+              "name": "The API is temporarily unable to serve the request. This may be returned by the API edge when the backend is unhealthy, or by the backend when an upstream catalog, quoting, or lookup service is unavailable.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v1",
+                    "reference",
+                    "providers"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [
+                    {
+                      "key": "query",
+                      "value": "Smith"
+                    },
+                    {
+                      "key": "zip_code",
+                      "value": "85001"
+                    },
+                    {
+                      "key": "exchange",
+                      "value": "on_exchange"
+                    },
+                    {
+                      "key": "page[number]",
+                      "value": "1"
+                    },
+                    {
+                      "key": "page[size]",
+                      "value": "50"
+                    }
+                  ],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Service Unavailable",
+              "code": 503,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"error\": {\n    \"code\": \"service_unavailable\",\n    \"message\": \"The service is temporarily unavailable. Please try again later.\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "aea91205-e335-491c-9354-1c336eefa197",
+              "name": "The API edge did not receive a timely response from the backend.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v1",
+                    "reference",
+                    "providers"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [
+                    {
+                      "key": "query",
+                      "value": "Smith"
+                    },
+                    {
+                      "key": "zip_code",
+                      "value": "85001"
+                    },
+                    {
+                      "key": "exchange",
+                      "value": "on_exchange"
+                    },
+                    {
+                      "key": "page[number]",
+                      "value": "1"
+                    },
+                    {
+                      "key": "page[size]",
+                      "value": "50"
+                    }
+                  ],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Gateway Timeout",
+              "code": 504,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"error\": {\n    \"code\": \"gateway_timeout\",\n    \"message\": \"The API edge did not receive a timely response from the backend. Please try again later.\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        }
+      ],
+      "event": []
+    }
+  ],
+  "event": [],
+  "variable": [
+    {
+      "type": "string",
+      "value": "https://api.one.healthsherpa.com",
+      "key": "baseUrl"
+    }
+  ],
+  "auth": {
+    "type": "apikey",
+    "apikey": [
+      {
+        "key": "key",
+        "value": "x-api-key"
+      },
+      {
+        "key": "value",
+        "value": "{{apiKey}}"
+      },
+      {
+        "key": "in",
+        "value": "header"
+      }
+    ]
+  },
+  "info": {
+    "_postman_id": "4387765e-0d47-42e0-94bd-a076d001d8a9",
+    "name": "HealthSherpa Public Enrollment Sessions Reference API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": {
+      "content": "Machine-readable contract for the currently available public HealthSherpa endpoints: GET /v1/ping, GET /v1/reference/counties, GET /v1/reference/issuers, GET /v1/reference/providers, POST /v1/quotes, the approval-gated POST /v1/enrollment-sessions, and the approval-gated direct enrollment endpoints GET /v1/enrollments, POST /v1/enrollments, PUT /v1/enrollments/{enrollment_id}, GET /v1/enrollments/{enrollment_id}, POST /v1/enrollments/{enrollment_id}/cancellations, POST /v1/enrollments/{enrollment_id}/terminations, POST /v1/enrollments/{enrollment_id}/submissions, GET /v1/enrollments/{enrollment_id}/payment_redirect, and POST /v1/enrollments/{enrollment_id}/supporting_documentation. Object schemas remain additive and clients should ignore response fields they do not recognize.\n\nMost HealthSherpa-owned errors follow the unified `ErrorResponse` schema: `{ \"error\": { \"code\": string, \"message\": string, \"details\"?: object } }`. The direct enrollment endpoints instead return service failures as a top-level `errors[]` array: `{ \"errors\": [ { \"code\": string, \"message\": string, \"field\"?: string } ] }`. Edge-generated failures (API Gateway and WAF, before a request reaches the service) always use the unified `ErrorResponse` envelope, including on the direct enrollment endpoints — most notably a missing or invalid API key (`403 forbidden`).",
+      "type": "text/plain"
+    }
+  }
+}

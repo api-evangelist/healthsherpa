@@ -1,0 +1,41 @@
+{
+  "opencollection": "1.0.0",
+  "info": {
+    "name": "HealthSherpa Public Enrollment Sessions Quotes API",
+    "version": "0.1.0"
+  },
+  "request": {
+    "auth": {
+      "type": "apikey",
+      "key": "x-api-key",
+      "value": "{{x-api-key}}",
+      "placement": "header"
+    }
+  },
+  "items": [
+    {
+      "info": {
+        "name": "Quotes",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "Search plans for one coverage type",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://api.one.healthsherpa.com/v1/quotes",
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Returns a homogeneous list of quote results for exactly one coverage_type. Send one request for one market and one coverage_type at a time."
+        }
+      ]
+    }
+  ],
+  "bundled": true
+}
