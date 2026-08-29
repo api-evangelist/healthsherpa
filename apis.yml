@@ -11,6 +11,18 @@ description: >-
   header; enrollment writes support Idempotency-Key with 24-hour retention. Separate ICHRA and
   Medicare Partner APIs provide QuoteConnect/EnrollConnect, deeplinked enrollment, and webhooks.
   HealthSherpa publishes first-party Agent Skills, an llms.txt, and vibe-coding prompts for agents.
+deliveryModel:
+  model: saas
+  open_source: false
+  commercial: true
+  callable_host: true
+  label: Hosted service · you call their endpoint
+  confidence: high
+  source:
+  - openapi
+  - pricing
+  generated: '2026-08-28'
+  method: derived
 accessModel:
   pricing: unknown
   onboarding: self-serve
