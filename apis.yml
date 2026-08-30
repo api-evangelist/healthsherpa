@@ -139,9 +139,9 @@ apis:
   - type: APIReference
     url: https://one.healthsherpa.com/docs.html
 common:
-  - type: CapabilityMap
-    url: capabilities/healthsherpa-capability-edges.yml
-    name: HealthSherpa Business Capability Map
+- type: CapabilityMap
+  url: capabilities/healthsherpa-capability-edges.yml
+  name: HealthSherpa Business Capability Map
 # --- Identity / link properties ---
 - type: DeveloperPortal
   url: https://one.healthsherpa.com/
