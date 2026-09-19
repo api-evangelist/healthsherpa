@@ -81,6 +81,8 @@ apis:
   humanURL: https://one.healthsherpa.com/
   baseURL: https://api.one.healthsherpa.com
   tags:
+  - Enrollment
+  tags_raw:
   - Enrollments
   properties:
   - type: OpenAPI
