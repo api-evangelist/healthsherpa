@@ -1,11 +1,8 @@
-openapi: 3.1.0
+openapi: 3.2.0
 info:
   title: HealthSherpa Public Enrollment Sessions API
   version: 0.1.0
-  description: 'Machine-readable contract for the currently available public HealthSherpa endpoints: GET /v1/ping, GET /v1/reference/counties, GET /v1/reference/issuers, GET /v1/reference/providers, POST /v1/quotes, the approval-gated POST /v1/enrollment-sessions, and the approval-gated direct enrollment endpoints GET /v1/enrollments, POST /v1/enrollments, PUT /v1/enrollments/{enrollment_id}, GET /v1/enrollments/{enrollment_id}, POST /v1/enrollments/{enrollment_id}/cancellations, POST /v1/enrollments/{enrollment_id}/terminations, POST /v1/enrollments/{enrollment_id}/submissions, GET /v1/enrollments/{enrollment_id}/payment_redirect, and POST /v1/enrollments/{enrollment_id}/supporting_documentation. Object schemas remain additive and clients should ignore response fields they do not recognize.
-
-
-    Most HealthSherpa-owned errors follow the unified `ErrorResponse` schema: `{ "error": { "code": string, "message": string, "details"?: object } }`. The direct enrollment endpoints instead return service failures as a top-level `errors[]` array: `{ "errors": [ { "code": string, "message": string, "field"?: string } ] }`. Edge-generated failures (API Gateway and WAF, before a request reaches the service) always use the unified `ErrorResponse` envelope, including on the direct enrollment endpoints — most notably a missing or invalid API key (`403 forbidden`).'
+  description: 'Machine-readable contract for the currently available public HealthSherpa endpoints: GET /v1/ping, GET /v1/reference/counties, GET /v1/reference/issuers, GET /v1/reference/providers, POST /v1/quotes, the approval-gated POST /v1/enrollment-sessions, and the approval-gated direct enrollment endpoints GET /v1/enrollments, POST /v1/enrollments, PUT /v1/enrollments/{enrollment_id}, GET /v1/enrollments/{enrollment_id}, POST /v1/enrollments/{enrollment_id}/cancellations, POST…'
 servers:
 - url: https://api.one.healthsherpa.com
   description: Production
@@ -153,116 +150,24 @@ paths:
           $ref: '#/components/responses/GatewayTimeout'
 components:
   schemas:
-    EnrollmentSessionResponseLinks:
+    EnrollmentSessionResponseWarning:
       type: object
       additionalProperties: true
       required:
-      - shopping_url
-      - client_apply_url
+      - code
+      - field
+      - message
+      description: One non-fatal warning about a single request field. New `code` values may be introduced additively over time; clients should treat unknown codes as 'log and continue'.
       properties:
-        shopping_url:
+        code:
           type: string
-          format: uri
-          description: HealthSherpa public shop URL (https://healthsherpa.com/public/shop?...).
-        client_apply_url:
+          description: Stable, machine-readable warning category. Currently only `deprecated_field` is emitted (when the request uses a `client.*` contact field that has been replaced by a `household.applicants[]` equivalent).
+        field:
           type: string
-          format: uri
-          description: HealthSherpa public apply URL (https://healthsherpa.com/public/apply?...). Always present for enrollment-session responses.
-    EnrollmentSessionLocation:
-      type: object
-      additionalProperties: false
-      description: Routing geography plus optional street address. `zip_code`, `fips_code`, and `state` route the request; `address_line_1`, `address_line_2`, and `city` are used by the agent-assisted enrollment flow only and ignored on self-service deep links.
-      properties:
-        zip_code:
+          description: Dotted request path of the field this warning is about (for example, `client.email`).
+        message:
           type: string
-          pattern: ^[0-9]{5}$
-        fips_code:
-          type: string
-          pattern: ^[0-9]{5}$
-          description: Five-digit county FIPS code. Mapped to the deep link's legacy `fip_code` parameter.
-        state:
-          type: string
-          description: Two-letter US state code (50 states plus DC).
-          pattern: ^[A-Za-z]{2}$
-        address_line_1:
-          type: string
-          description: First line of the street address (number and street). Used in the agent-assisted enrollment flow.
-          maxLength: 50
-        address_line_2:
-          type: string
-          description: Optional second line of the street address (apartment, suite). Used in the agent-assisted enrollment flow.
-          maxLength: 50
-        city:
-          type: string
-          description: City of the street address. Used in the agent-assisted enrollment flow; ignored on self-service deep links.
-          maxLength: 50
-    EnrollmentSessionClient:
-      type: object
-      additionalProperties: false
-      deprecated: true
-      description: 'DEPRECATED legacy contact block. Every property here has a 1:1 replacement on `household.applicants[]` and is preferred when both are supplied: `first_name` → `household.applicants[primary].first_name`, `last_name` → `household.applicants[primary].last_name`, `email` → `household.applicants[primary].email`, `phone_number` → `household.applicants[primary].phone_number`. Each field that is still supplied here surfaces a `deprecated_field` entry in the response''s `warnings[]` array. The block remains accepted for backwards compatibility but may be removed at any time; migrate to the applicant-level fields.'
-      properties:
-        first_name:
-          type: string
-          deprecated: true
-          description: DEPRECATED. Send as `household.applicants[primary].first_name` instead.
-          maxLength: 50
-        last_name:
-          type: string
-          deprecated: true
-          description: DEPRECATED. Send as `household.applicants[primary].last_name` instead.
-          maxLength: 50
-        email:
-          type: string
-          deprecated: true
-          description: DEPRECATED. Send as `household.applicants[primary].email` instead.
-          maxLength: 50
-        phone_number:
-          type: string
-          deprecated: true
-          description: DEPRECATED. Send as `household.applicants[primary].phone_number` instead.
-          maxLength: 50
-    EnrollmentSessionEnrollment:
-      type: object
-      additionalProperties: false
-      description: Accepts `hra`. Other enrollment subobjects (`special_enrollment_period`, `communication_preferences`) are not supported and are rejected with `400 invalid_request`.
-      properties:
-        hra:
-          $ref: '#/components/schemas/EnrollmentSessionEnrollmentHra'
-    EnrollmentSessionHousehold:
-      type: object
-      additionalProperties: false
-      description: '`household_size` must be at least 1. Applicants can include at most one `primary` and one `spouse`.'
-      properties:
-        annual_income:
-          type: number
-          minimum: 0
-        household_size:
-          type: integer
-          minimum: 1
-        someone_has_employer_coverage:
-          type: boolean
-        applicants:
-          type: array
-          items:
-            $ref: '#/components/schemas/EnrollmentSessionApplicant'
-    EnrollmentSessionEnrollmentHra:
-      type: object
-      additionalProperties: false
-      required:
-      - amount
-      description: When supplied, `amount` is required and must be greater than or equal to 0. `0` means the consumer declined available HRA funding; a positive value means funding was accepted. `frequency` is required when `amount > 0` and is omitted from the deep link when `amount == 0`.
-      properties:
-        amount:
-          type: number
-          minimum: 0
-        frequency:
-          type: string
-          enum:
-          - annually
-          - monthly
-          - quarterly
-          - one_time
+          description: Human-readable explanation. For deprecation warnings, includes the suggested replacement field path.
     ErrorResponse:
       type: object
       description: 'Canonical error envelope returned by HealthSherpa-owned API endpoint, infrastructure filter, and backend service failures. The direct enrollment endpoints return their own service failures using `EnrollmentErrorsResponse` (`errors[]`), but edge-generated failures on those endpoints (API Gateway and WAF, e.g. a missing or invalid API key) still use this `ErrorResponse` envelope. Clients should treat `error.code` as the stable programmatic identifier and surface `error.message` to humans. Recognized codes include:
@@ -312,187 +217,6 @@ components:
                 type: array
                 items:
                   type: string
-    EnrollmentSessionApplicantIncomeSource:
-      type: object
-      additionalProperties: false
-      required:
-      - amount
-      description: One income line attributed to this applicant. `amount` is required so the enrollment flow receives usable income information.
-      properties:
-        employer:
-          type: string
-          description: Employer or payer attributed to this income line.
-          maxLength: 50
-        amount:
-          type: number
-          description: Annual income from this source in dollars.
-          minimum: 0
-    EnrollmentSessionResponse:
-      type: object
-      additionalProperties: true
-      required:
-      - links
-      description: Response envelope. Fields may be null when the request omits optional inputs (for example, `external_id`). Clients must tolerate new top-level keys appearing additively over time. `warnings` is emitted only when the request used a deprecated field; clients should treat its absence as 'no warnings'.
-      properties:
-        external_id:
-          type: string
-          nullable: true
-          description: Echoed from the request when supplied; otherwise null.
-        links:
-          $ref: '#/components/schemas/EnrollmentSessionResponseLinks'
-        warnings:
-          type: array
-          description: Non-fatal warnings about the request. Today only the legacy `client.*` contact block emits warnings — one entry per deprecated field that was supplied. The key is omitted entirely when there are no warnings. Clients that want to detect deprecations programmatically should branch on `warnings[].code`.
-          items:
-            $ref: '#/components/schemas/EnrollmentSessionResponseWarning'
-    EnrollmentSessionContext:
-      type: object
-      additionalProperties: false
-      required:
-      - product
-      - exchange
-      - coverage_family
-      - coverage_type
-      - plan_year
-      - flow
-      - locale
-      properties:
-        product:
-          type: string
-          enum:
-          - aca
-        exchange:
-          type: string
-          enum:
-          - on_exchange
-        coverage_family:
-          type: string
-          enum:
-          - medical
-        coverage_type:
-          type: string
-          enum:
-          - medical
-        plan_year:
-          type: integer
-          minimum: 2020
-          maximum: 2099
-        flow:
-          type: string
-          enum:
-          - agent_assisted
-          - self_service
-          description: Mapped to the deep link's `user_type` (`agent_assisted` -> `agent`, `self_service` -> `consumer`).
-        locale:
-          type: string
-          enum:
-          - en-US
-          - es-MX
-          description: '`es-MX` enables the Spanish flow via the deep link''s `ljs` parameter.'
-    EnrollmentSessionRequest:
-      type: object
-      additionalProperties: false
-      required:
-      - context
-      description: POST /v1/enrollment-sessions request body. Unsupported fields anywhere in the body are rejected with `400 invalid_request`. In `self_service`, supply at least one of `location.state` or top-level `plan_id`. In `agent_assisted`, `location.state` is required and `plan_id` is not accepted.
-      properties:
-        external_id:
-          type: string
-          description: Partner-supplied identifier echoed in the response and used for CRM correlation. Strongly recommended; must not contain PII.
-        plan_id:
-          type: string
-          description: Plan ID (HIOS ID). Available only for the `self_service` flow, where it identifies the plan for the generated apply link. Invalid for `agent_assisted` — requests carrying `plan_id` with `context.flow` set to `agent_assisted` are rejected with `400 invalid_request`.
-        notes:
-          type: string
-          description: Free-form note for the assisting agent. Used only in the agent-assisted enrollment flow; ignored on self-service deep links. Capped at 500 characters; longer values are rejected with `400 invalid_request`.
-          maxLength: 500
-        providers:
-          type: array
-          description: Provider identifiers (NPI strings) the household cares about. Used by the agent-assisted enrollment flow and added to the self-service `shopping_url` as a network filter (shop only; not added to `client_apply_url`).
-          items:
-            type: string
-            description: Ten-digit National Provider Identifier (NPI).
-            pattern: ^[0-9]{10}$
-        context:
-          $ref: '#/components/schemas/EnrollmentSessionContext'
-        client:
-          $ref: '#/components/schemas/EnrollmentSessionClient'
-        location:
-          $ref: '#/components/schemas/EnrollmentSessionLocation'
-        household:
-          $ref: '#/components/schemas/EnrollmentSessionHousehold'
-        enrollment:
-          $ref: '#/components/schemas/EnrollmentSessionEnrollment'
-        campaign:
-          $ref: '#/components/schemas/EnrollmentSessionCampaign'
-    EnrollmentSessionResponseWarning:
-      type: object
-      additionalProperties: true
-      required:
-      - code
-      - field
-      - message
-      description: One non-fatal warning about a single request field. New `code` values may be introduced additively over time; clients should treat unknown codes as 'log and continue'.
-      properties:
-        code:
-          type: string
-          description: Stable, machine-readable warning category. Currently only `deprecated_field` is emitted (when the request uses a `client.*` contact field that has been replaced by a `household.applicants[]` equivalent).
-        field:
-          type: string
-          description: Dotted request path of the field this warning is about (for example, `client.email`).
-        message:
-          type: string
-          description: Human-readable explanation. For deprecation warnings, includes the suggested replacement field path.
-    EnrollmentSessionCampaign:
-      type: object
-      additionalProperties: false
-      description: 'Marketing attribution. Only accepted when `context.flow` is `self_service`; sending any field with `flow: "agent_assisted"` is rejected with `400 invalid_request`.'
-      properties:
-        cid:
-          type: string
-        utm_source:
-          type: string
-        utm_medium:
-          type: string
-        utm_campaign:
-          type: string
-        utm_term:
-          type: string
-        utm_content:
-          type: string
-        display_phone_number:
-          type: string
-          pattern: ^\D?(\d{3})\D?\D?(\d{3})\D?(\d{4})$
-          description: Phone number HealthSherpa renders in the page header. Must be a 10-digit US phone number (any of `8005551234`, `800-555-1234`, `800.555.1234`, `(800) 555-1234` are accepted); `+1`-prefixed and non-10-digit values are rejected with `400 invalid_request`. Forwarded to the deep link's `call` parameter unchanged.
-    EnrollmentSessionApplicantIchra:
-      type: object
-      additionalProperties: false
-      properties:
-        offered:
-          type: boolean
-        offered_cafeteria:
-          type: boolean
-        employee_amount:
-          type: number
-          minimum: 0
-        family_amount:
-          type: number
-          minimum: 0
-    EnrollmentSessionApplicantPrescription:
-      type: object
-      additionalProperties: false
-      description: Medication identification used for Rx-matched plan ranking. At least one of `id` or `rx_norm_identifier` must be supplied; entries with neither are rejected with `400 invalid_request`.
-      properties:
-        id:
-          type: string
-          description: HealthSherpa medication catalog identifier.
-        duration:
-          type: integer
-          description: Days-of-supply per fill (informational; not used to filter plans).
-          minimum: 0
-        rx_norm_identifier:
-          type: string
-          description: RxNorm CUI for the medication.
     EnrollmentSessionApplicant:
       type: object
       additionalProperties: false
@@ -559,17 +283,290 @@ components:
           description: Income lines attributed to this applicant. Used by the agent-assisted enrollment flow only; ignored on self-service deep links. When any applicant supplies `income_sources`, the per-applicant entries replace the household-level `annual_income` aggregation for the agent-assisted flow; `annual_income` continues to drive the self-service deep link regardless.
           items:
             $ref: '#/components/schemas/EnrollmentSessionApplicantIncomeSource'
+    EnrollmentSessionApplicantIncomeSource:
+      type: object
+      additionalProperties: false
+      required:
+      - amount
+      description: One income line attributed to this applicant. `amount` is required so the enrollment flow receives usable income information.
+      properties:
+        employer:
+          type: string
+          description: Employer or payer attributed to this income line.
+          maxLength: 50
+        amount:
+          type: number
+          description: Annual income from this source in dollars.
+          minimum: 0
+    EnrollmentSessionContext:
+      type: object
+      additionalProperties: false
+      required:
+      - product
+      - exchange
+      - coverage_family
+      - coverage_type
+      - plan_year
+      - flow
+      - locale
+      properties:
+        product:
+          type: string
+          enum:
+          - aca
+        exchange:
+          type: string
+          enum:
+          - on_exchange
+        coverage_family:
+          type: string
+          enum:
+          - medical
+        coverage_type:
+          type: string
+          enum:
+          - medical
+        plan_year:
+          type: integer
+          minimum: 2020
+          maximum: 2099
+        flow:
+          type: string
+          enum:
+          - agent_assisted
+          - self_service
+          description: Mapped to the deep link's `user_type` (`agent_assisted` -> `agent`, `self_service` -> `consumer`).
+        locale:
+          type: string
+          enum:
+          - en-US
+          - es-MX
+          description: '`es-MX` enables the Spanish flow via the deep link''s `ljs` parameter.'
+    EnrollmentSessionApplicantIchra:
+      type: object
+      additionalProperties: false
+      properties:
+        offered:
+          type: boolean
+        offered_cafeteria:
+          type: boolean
+        employee_amount:
+          type: number
+          minimum: 0
+        family_amount:
+          type: number
+          minimum: 0
+    EnrollmentSessionCampaign:
+      type: object
+      additionalProperties: false
+      description: 'Marketing attribution. Only accepted when `context.flow` is `self_service`; sending any field with `flow: "agent_assisted"` is rejected with `400 invalid_request`.'
+      properties:
+        cid:
+          type: string
+        utm_source:
+          type: string
+        utm_medium:
+          type: string
+        utm_campaign:
+          type: string
+        utm_term:
+          type: string
+        utm_content:
+          type: string
+        display_phone_number:
+          type: string
+          pattern: ^\D?(\d{3})\D?\D?(\d{3})\D?(\d{4})$
+          description: Phone number HealthSherpa renders in the page header. Must be a 10-digit US phone number (any of `8005551234`, `800-555-1234`, `800.555.1234`, `(800) 555-1234` are accepted); `+1`-prefixed and non-10-digit values are rejected with `400 invalid_request`. Forwarded to the deep link's `call` parameter unchanged.
+    EnrollmentSessionEnrollmentHra:
+      type: object
+      additionalProperties: false
+      required:
+      - amount
+      description: When supplied, `amount` is required and must be greater than or equal to 0. `0` means the consumer declined available HRA funding; a positive value means funding was accepted. `frequency` is required when `amount > 0` and is omitted from the deep link when `amount == 0`.
+      properties:
+        amount:
+          type: number
+          minimum: 0
+        frequency:
+          type: string
+          enum:
+          - annually
+          - monthly
+          - quarterly
+          - one_time
+    EnrollmentSessionLocation:
+      type: object
+      additionalProperties: false
+      description: Routing geography plus optional street address. `zip_code`, `fips_code`, and `state` route the request; `address_line_1`, `address_line_2`, and `city` are used by the agent-assisted enrollment flow only and ignored on self-service deep links.
+      properties:
+        zip_code:
+          type: string
+          pattern: ^[0-9]{5}$
+        fips_code:
+          type: string
+          pattern: ^[0-9]{5}$
+          description: Five-digit county FIPS code. Mapped to the deep link's legacy `fip_code` parameter.
+        state:
+          type: string
+          description: Two-letter US state code (50 states plus DC).
+          pattern: ^[A-Za-z]{2}$
+        address_line_1:
+          type: string
+          description: First line of the street address (number and street). Used in the agent-assisted enrollment flow.
+          maxLength: 50
+        address_line_2:
+          type: string
+          description: Optional second line of the street address (apartment, suite). Used in the agent-assisted enrollment flow.
+          maxLength: 50
+        city:
+          type: string
+          description: City of the street address. Used in the agent-assisted enrollment flow; ignored on self-service deep links.
+          maxLength: 50
+    EnrollmentSessionResponseLinks:
+      type: object
+      additionalProperties: true
+      required:
+      - shopping_url
+      - client_apply_url
+      properties:
+        shopping_url:
+          type: string
+          format: uri
+          description: HealthSherpa public shop URL (https://healthsherpa.com/public/shop?...).
+        client_apply_url:
+          type: string
+          format: uri
+          description: HealthSherpa public apply URL (https://healthsherpa.com/public/apply?...). Always present for enrollment-session responses.
+    EnrollmentSessionClient:
+      type: object
+      additionalProperties: false
+      deprecated: true
+      description: 'DEPRECATED legacy contact block. Every property here has a 1:1 replacement on `household.applicants[]` and is preferred when both are supplied: `first_name` → `household.applicants[primary].first_name`, `last_name` → `household.applicants[primary].last_name`, `email` → `household.applicants[primary].email`, `phone_number` → `household.applicants[primary].phone_number`. Each field that is still supplied here surfaces a `deprecated_field` entry in the response''s `warnings[]` array. The block remains accepted for backwards compatibility but may be removed at any time; migrate to the applicant-level fields.'
+      properties:
+        first_name:
+          type: string
+          deprecated: true
+          description: DEPRECATED. Send as `household.applicants[primary].first_name` instead.
+          maxLength: 50
+        last_name:
+          type: string
+          deprecated: true
+          description: DEPRECATED. Send as `household.applicants[primary].last_name` instead.
+          maxLength: 50
+        email:
+          type: string
+          deprecated: true
+          description: DEPRECATED. Send as `household.applicants[primary].email` instead.
+          maxLength: 50
+        phone_number:
+          type: string
+          deprecated: true
+          description: DEPRECATED. Send as `household.applicants[primary].phone_number` instead.
+          maxLength: 50
+    EnrollmentSessionApplicantPrescription:
+      type: object
+      additionalProperties: false
+      description: Medication identification used for Rx-matched plan ranking. At least one of `id` or `rx_norm_identifier` must be supplied; entries with neither are rejected with `400 invalid_request`.
+      properties:
+        id:
+          type: string
+          description: HealthSherpa medication catalog identifier.
+        duration:
+          type: integer
+          description: Days-of-supply per fill (informational; not used to filter plans).
+          minimum: 0
+        rx_norm_identifier:
+          type: string
+          description: RxNorm CUI for the medication.
+    EnrollmentSessionEnrollment:
+      type: object
+      additionalProperties: false
+      description: Accepts `hra`. Other enrollment subobjects (`special_enrollment_period`, `communication_preferences`) are not supported and are rejected with `400 invalid_request`.
+      properties:
+        hra:
+          $ref: '#/components/schemas/EnrollmentSessionEnrollmentHra'
+    EnrollmentSessionResponse:
+      type: object
+      additionalProperties: true
+      required:
+      - links
+      description: Response envelope. Fields may be null when the request omits optional inputs (for example, `external_id`). Clients must tolerate new top-level keys appearing additively over time. `warnings` is emitted only when the request used a deprecated field; clients should treat its absence as 'no warnings'.
+      properties:
+        external_id:
+          type: string
+          nullable: true
+          description: Echoed from the request when supplied; otherwise null.
+        links:
+          $ref: '#/components/schemas/EnrollmentSessionResponseLinks'
+        warnings:
+          type: array
+          description: Non-fatal warnings about the request. Today only the legacy `client.*` contact block emits warnings — one entry per deprecated field that was supplied. The key is omitted entirely when there are no warnings. Clients that want to detect deprecations programmatically should branch on `warnings[].code`.
+          items:
+            $ref: '#/components/schemas/EnrollmentSessionResponseWarning'
+    EnrollmentSessionHousehold:
+      type: object
+      additionalProperties: false
+      description: '`household_size` must be at least 1. Applicants can include at most one `primary` and one `spouse`.'
+      properties:
+        annual_income:
+          type: number
+          minimum: 0
+        household_size:
+          type: integer
+          minimum: 1
+        someone_has_employer_coverage:
+          type: boolean
+        applicants:
+          type: array
+          items:
+            $ref: '#/components/schemas/EnrollmentSessionApplicant'
+    EnrollmentSessionRequest:
+      type: object
+      additionalProperties: false
+      required:
+      - context
+      description: POST /v1/enrollment-sessions request body. Unsupported fields anywhere in the body are rejected with `400 invalid_request`. In `self_service`, supply at least one of `location.state` or top-level `plan_id`. In `agent_assisted`, `location.state` is required and `plan_id` is not accepted.
+      properties:
+        external_id:
+          type: string
+          description: Partner-supplied identifier echoed in the response and used for CRM correlation. Strongly recommended; must not contain PII.
+        plan_id:
+          type: string
+          description: Plan ID (HIOS ID). Available only for the `self_service` flow, where it identifies the plan for the generated apply link. Invalid for `agent_assisted` — requests carrying `plan_id` with `context.flow` set to `agent_assisted` are rejected with `400 invalid_request`.
+        notes:
+          type: string
+          description: Free-form note for the assisting agent. Used only in the agent-assisted enrollment flow; ignored on self-service deep links. Capped at 500 characters; longer values are rejected with `400 invalid_request`.
+          maxLength: 500
+        providers:
+          type: array
+          description: Provider identifiers (NPI strings) the household cares about. Used by the agent-assisted enrollment flow and added to the self-service `shopping_url` as a network filter (shop only; not added to `client_apply_url`).
+          items:
+            type: string
+            description: Ten-digit National Provider Identifier (NPI).
+            pattern: ^[0-9]{10}$
+        context:
+          $ref: '#/components/schemas/EnrollmentSessionContext'
+        client:
+          $ref: '#/components/schemas/EnrollmentSessionClient'
+        location:
+          $ref: '#/components/schemas/EnrollmentSessionLocation'
+        household:
+          $ref: '#/components/schemas/EnrollmentSessionHousehold'
+        enrollment:
+          $ref: '#/components/schemas/EnrollmentSessionEnrollment'
+        campaign:
+          $ref: '#/components/schemas/EnrollmentSessionCampaign'
   responses:
-    InternalError:
-      description: An unexpected error occurred.
+    IdempotencyMismatch:
+      description: The `Idempotency-Key` has been used before within the 24-hour retention window, but the current request body is not byte-for-byte identical to the original. To resolve, either resubmit the exact original payload or generate a fresh `Idempotency-Key` for the new request.
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/ErrorResponse'
           example:
             error:
-              code: internal_error
-              message: An unexpected error occurred.
+              code: idempotency_mismatch
+              message: This Idempotency-Key has already been used with a different request body.
     RateLimited:
       description: Rate limit exceeded. Clients should back off and retry after the delay advertised in the Retry-After header.
       headers:
@@ -585,26 +582,6 @@ components:
             error:
               code: rate_limited
               message: Request rate limit exceeded. Please slow down and retry shortly.
-    IdempotencyInProgress:
-      description: A previous request with the same `Idempotency-Key` is still being processed by the API. The partner should wait briefly and retry. The response is not produced by the upstream service — the in-flight request from the first call will succeed or fail on its own.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-          example:
-            error:
-              code: idempotency_in_progress
-              message: A request with this Idempotency-Key is already being processed. Retry once it completes.
-    GatewayTimeout:
-      description: The API edge did not receive a timely response from the backend.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-          example:
-            error:
-              code: gateway_timeout
-              message: The API edge did not receive a timely response from the backend. Please try again later.
     UnsupportedMediaType:
       description: The request `Content-Type` is not supported by the endpoint.
       content:
@@ -615,6 +592,46 @@ components:
             error:
               code: unsupported_media_type
               message: The request Content-Type is not supported by this endpoint.
+    PayloadTooLarge:
+      description: The request body exceeded the maximum size accepted by the API edge.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error:
+              code: payload_too_large
+              message: The request payload exceeded the maximum allowed size.
+    GatewayTimeout:
+      description: The API edge did not receive a timely response from the backend.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error:
+              code: gateway_timeout
+              message: The API edge did not receive a timely response from the backend. Please try again later.
+    InternalError:
+      description: An unexpected error occurred.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error:
+              code: internal_error
+              message: An unexpected error occurred.
+    IdempotencyInProgress:
+      description: A previous request with the same `Idempotency-Key` is still being processed by the API. The partner should wait briefly and retry. The response is not produced by the upstream service — the in-flight request from the first call will succeed or fail on its own.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error:
+              code: idempotency_in_progress
+              message: A request with this Idempotency-Key is already being processed. Retry once it completes.
     ServiceUnavailable:
       description: The API is temporarily unable to serve the request. This may be returned by the API edge when the backend is unhealthy, or by the backend when an upstream catalog, quoting, or lookup service is unavailable.
       content:
@@ -625,16 +642,6 @@ components:
             error:
               code: service_unavailable
               message: The service is temporarily unavailable. Please try again later.
-    BadGateway:
-      description: The API edge received an invalid response from the backend.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-          example:
-            error:
-              code: bad_gateway
-              message: The API edge received an invalid response from the backend. Please try again later.
     BadRequest:
       description: 'Request validation failed. The response body''s `error.details` map contains per-field messages when the backend produced the error; edge-generated 400s omit `details`.
 
@@ -651,26 +658,16 @@ components:
               details:
                 zip_code:
                 - ZIP code must be 5 digits
-    PayloadTooLarge:
-      description: The request body exceeded the maximum size accepted by the API edge.
+    BadGateway:
+      description: The API edge received an invalid response from the backend.
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/ErrorResponse'
           example:
             error:
-              code: payload_too_large
-              message: The request payload exceeded the maximum allowed size.
-    IdempotencyMismatch:
-      description: The `Idempotency-Key` has been used before within the 24-hour retention window, but the current request body is not byte-for-byte identical to the original. To resolve, either resubmit the exact original payload or generate a fresh `Idempotency-Key` for the new request.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-          example:
-            error:
-              code: idempotency_mismatch
-              message: This Idempotency-Key has already been used with a different request body.
+              code: bad_gateway
+              message: The API edge received an invalid response from the backend. Please try again later.
   securitySchemes:
     ApiKeyAuth:
       type: apiKey
