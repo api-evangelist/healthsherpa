@@ -40,6 +40,72 @@ paths:
         '504':
           $ref: '#/components/responses/GatewayTimeout'
 components:
+  responses:
+    Forbidden:
+      description: The API key is missing, invalid, not authorized for this API, or the request was blocked at the API edge. Public API requests may receive this edge-generated response before the backend can return a runtime 401. When a request reaches the backend, 403 may also mean the developer account or integration is not in the state required for that operation. For `POST /v1/enrollment-sessions`, that operation documents its own flow-scoped 403 requirements (both flows require approved on-exchange enrollment access, plus `agent_assisted` OAuth link vs `self_service` deeplink agent ID) instead of using this shared response reference.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error:
+              code: forbidden
+              message: The supplied API key is missing, invalid, or not authorized for this API.
+    BadGateway:
+      description: The API edge received an invalid response from the backend.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error:
+              code: bad_gateway
+              message: The API edge received an invalid response from the backend. Please try again later.
+    ServiceUnavailable:
+      description: The API is temporarily unable to serve the request. This may be returned by the API edge when the backend is unhealthy, or by the backend when an upstream catalog, quoting, or lookup service is unavailable.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error:
+              code: service_unavailable
+              message: The service is temporarily unavailable. Please try again later.
+    GatewayTimeout:
+      description: The API edge did not receive a timely response from the backend.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error:
+              code: gateway_timeout
+              message: The API edge did not receive a timely response from the backend. Please try again later.
+    RateLimited:
+      description: Rate limit exceeded. Clients should back off and retry after the delay advertised in the Retry-After header.
+      headers:
+        Retry-After:
+          description: Number of seconds the client should wait before retrying.
+          schema:
+            type: integer
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error:
+              code: rate_limited
+              message: Request rate limit exceeded. Please slow down and retry shortly.
+    InternalError:
+      description: An unexpected error occurred.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error:
+              code: internal_error
+              message: An unexpected error occurred.
   schemas:
     PingResponse:
       type: object
@@ -101,72 +167,6 @@ components:
                 type: array
                 items:
                   type: string
-  responses:
-    GatewayTimeout:
-      description: The API edge did not receive a timely response from the backend.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-          example:
-            error:
-              code: gateway_timeout
-              message: The API edge did not receive a timely response from the backend. Please try again later.
-    ServiceUnavailable:
-      description: The API is temporarily unable to serve the request. This may be returned by the API edge when the backend is unhealthy, or by the backend when an upstream catalog, quoting, or lookup service is unavailable.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-          example:
-            error:
-              code: service_unavailable
-              message: The service is temporarily unavailable. Please try again later.
-    Forbidden:
-      description: The API key is missing, invalid, not authorized for this API, or the request was blocked at the API edge. Public API requests may receive this edge-generated response before the backend can return a runtime 401. When a request reaches the backend, 403 may also mean the developer account or integration is not in the state required for that operation. For `POST /v1/enrollment-sessions`, that operation documents its own flow-scoped 403 requirements (both flows require approved on-exchange enrollment access, plus `agent_assisted` OAuth link vs `self_service` deeplink agent ID) instead of using this shared response reference.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-          example:
-            error:
-              code: forbidden
-              message: The supplied API key is missing, invalid, or not authorized for this API.
-    RateLimited:
-      description: Rate limit exceeded. Clients should back off and retry after the delay advertised in the Retry-After header.
-      headers:
-        Retry-After:
-          description: Number of seconds the client should wait before retrying.
-          schema:
-            type: integer
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-          example:
-            error:
-              code: rate_limited
-              message: Request rate limit exceeded. Please slow down and retry shortly.
-    BadGateway:
-      description: The API edge received an invalid response from the backend.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-          example:
-            error:
-              code: bad_gateway
-              message: The API edge received an invalid response from the backend. Please try again later.
-    InternalError:
-      description: An unexpected error occurred.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-          example:
-            error:
-              code: internal_error
-              message: An unexpected error occurred.
   securitySchemes:
     ApiKeyAuth:
       type: apiKey
