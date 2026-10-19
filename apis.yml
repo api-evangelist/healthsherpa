@@ -141,6 +141,16 @@ apis:
     url: https://one.healthsherpa.com/docs.html
   - type: APIReference
     url: https://one.healthsherpa.com/docs.html
+- aid: healthsherpa:healthsherpa-policy-status-api
+  name: HealthSherpa Policy Status API
+  description: The Policy Status API from HealthSherpa — 2 operation(s) for policy status.
+  humanURL: https://one.healthsherpa.com/
+  baseURL: https://api.one.healthsherpa.com
+  tags:
+  - Policy Status
+  properties:
+  - type: OpenAPI
+    url: openapi/healthsherpa-policy-status-api-openapi.yml
 common:
 - type: CapabilityMap
   url: capabilities/healthsherpa-capability-edges.yml

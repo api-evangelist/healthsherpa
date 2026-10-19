@@ -1,30 +1,25 @@
 {
   "provider": "healthsherpa",
   "sources": [
-    "_original/healthsherpa-one-openapi.json"
+    "_original/healthsherpa-openapi.json"
   ],
   "outputs": [
     "healthsherpa-enrollment-sessions-api-openapi.yml",
     "healthsherpa-enrollments-api-openapi.yml",
+    "healthsherpa-policy-status-api-openapi.yml",
     "healthsherpa-quotes-api-openapi.yml",
     "healthsherpa-reference-api-openapi.yml",
     "healthsherpa-utility-api-openapi.yml"
   ],
   "archived": [],
   "errors": [
-    "healthsherpa-one-openapi.json: dangling $ref: #/components/responses/Unauthorized"
+    "healthsherpa-openapi.json: dangling $ref: #/components/responses/Unauthorized"
   ],
   "warnings": [],
   "notes": [
     "sourced from openapi/_original/ (1 archived document(s)); previously refined output at the top level was skipped rather than re-split",
-    "healthsherpa-one-openapi.json: upgraded openapi 3.1.0 -> OpenAPI 3.2.0",
-    "apis.yml register: already-registered"
+    "healthsherpa-openapi.json: upgraded openapi 3.1.0 -> OpenAPI 3.2.0",
+    "apis.yml register: written (+1 apis, 6 total)"
   ],
-  "skipped": [
-    "healthsherpa-enrollment-sessions-api-openapi.yml: previously refined output, superseded by openapi/_original/",
-    "healthsherpa-enrollments-api-openapi.yml: previously refined output, superseded by openapi/_original/",
-    "healthsherpa-quotes-api-openapi.yml: previously refined output, superseded by openapi/_original/",
-    "healthsherpa-reference-api-openapi.yml: previously refined output, superseded by openapi/_original/",
-    "healthsherpa-utility-api-openapi.yml: previously refined output, superseded by openapi/_original/"
-  ]
+  "skipped": []
 }

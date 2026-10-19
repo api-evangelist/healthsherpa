@@ -2,7 +2,43 @@ openapi: 3.2.0
 info:
   title: HealthSherpa Public Utility API
   version: 0.1.0
-  description: 'Machine-readable contract for the currently available public HealthSherpa endpoints: GET /v1/ping, GET /v1/reference/counties, GET /v1/reference/issuers, GET /v1/reference/providers, POST /v1/quotes, the approval-gated POST /v1/enrollment-sessions, and the approval-gated direct enrollment endpoints GET /v1/enrollments, POST /v1/enrollments, PUT /v1/enrollments/{enrollment_id}, GET /v1/enrollments/{enrollment_id}, POST /v1/enrollments/{enrollment_id}/cancellations, POST…'
+  termsOfService: https://one.healthsherpa.com/legal/healthsherpa-one-api-terms-of-service.html
+  description: 'Machine-readable contract for the currently available public HealthSherpa endpoints: GET /v1/ping, GET /v1/reference/counties, GET /v1/reference/issuers, GET /v1/reference/providers, POST /v1/quotes, the approval-gated POST /v1/enrollment-sessions, the approval-gated on-exchange policy status endpoints GET /v1/policy-status/applications and GET /v1/policy-status/applications/{confirmation_id}, and the approval-gated direct enrollment endpoints GET /v1/enrollments, POST /v1/enrollments, PUT /v1/enrollments/{enrollment_id}, GET /v1/enrollments/{enrollment_id}, POST /v1/enrollments/{enrollment_id}/cancellations, POST /v1/enrollments/{enrollment_id}/terminations, POST /v1/enrollments/{enrollment_id}/submissions, GET /v1/enrollments/{enrollment_id}/payment_redirect, and POST /v1/enrollments/{enrollment_id}/supporting_documentation. Object schemas remain additive and clients should ignore response fields they do not recognize.
+
+
+    Most HealthSherpa-owned errors follow the unified `ErrorResponse` schema: `{ "error": { "code": string, "message": string, "details"?: object } }`. The direct enrollment endpoints instead return service failures as a top-level `errors[]` array: `{ "errors": [ { "code": string, "message": string, "field"?: string } ] }`. Edge-generated failures (API Gateway and WAF, before a request reaches the service) always use the unified `ErrorResponse` envelope, including on the direct enrollment endpoints — most notably a missing or invalid API key (`403 forbidden`).
+
+
+    ## Terms and compliance
+
+
+    - HealthSherpa ONE API Terms of Service
+
+    - Compliance considerations
+
+    - CMS web-broker guidance
+
+    - 45 CFR § 155.220'
+  x-rate-limits:
+    description: Each API key is assigned one throughput tier. Its rate and burst limits apply to every API route. A shared stage limit also applies across callers.
+    defaultTier: low
+    monthlyQuotaPeriod: MONTH
+    sharedStage:
+      rateLimitRps: 20
+      burstLimit: 30
+    tiers:
+      low:
+        rateLimitRps: 1
+        burstLimit: 2
+        monthlyQuota: 100000
+      medium:
+        rateLimitRps: 5
+        burstLimit: 10
+        monthlyQuota: 500000
+      high:
+        rateLimitRps: 10
+        burstLimit: 20
+        monthlyQuota: 1000000
 servers:
 - url: https://api.one.healthsherpa.com
   description: Production
@@ -41,8 +77,48 @@ paths:
           $ref: '#/components/responses/GatewayTimeout'
 components:
   responses:
+    GatewayTimeout:
+      description: The API edge did not receive a timely response from the backend.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error:
+              code: gateway_timeout
+              message: The API edge did not receive a timely response from the backend. Please try again later.
+    InternalError:
+      description: An unexpected error occurred.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error:
+              code: internal_error
+              message: An unexpected error occurred.
+    Forbidden:
+      description: The API key is missing, invalid, not authorized for this API, or the request was blocked at the API edge. Edge policy may deny requests from identified anonymous proxies, VPNs, and Tor exits, plus requests matching known bad input or high-confidence SSRF, LFI, RFI, restricted-extension, or cross-site-scripting signatures. Do not retry an unchanged edge-blocked request; contact developer support if a legitimate request is blocked. Public API requests may receive this edge-generated response before the backend can return a runtime 401. When a request reaches the backend, 403 may also mean the developer account or integration is not in the state required for that operation. For `POST /v1/enrollment-sessions`, that operation documents its own flow-scoped 403 requirements (both flows require approved on-exchange enrollment access, plus `agent_assisted` OAuth link vs `self_service` deeplink agent ID) instead of using this shared response reference.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error:
+              code: forbidden
+              message: The supplied API key is missing, invalid, or not authorized for this API.
+    BadGateway:
+      description: The API edge received an invalid response from the backend.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error:
+              code: bad_gateway
+              message: The API edge received an invalid response from the backend. Please try again later.
     RateLimited:
-      description: Rate limit exceeded. Clients should back off and retry after the delay advertised in the Retry-After header.
+      description: The per-key throughput tier, monthly quota, or shared stage limit was exceeded. Per-key tier limits apply to every API route. Clients should honor Retry-After when present and retry with exponential backoff and jitter.
       headers:
         Retry-After:
           description: Number of seconds the client should wait before retrying.
@@ -56,16 +132,6 @@ components:
             error:
               code: rate_limited
               message: Request rate limit exceeded. Please slow down and retry shortly.
-    GatewayTimeout:
-      description: The API edge did not receive a timely response from the backend.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-          example:
-            error:
-              code: gateway_timeout
-              message: The API edge did not receive a timely response from the backend. Please try again later.
     ServiceUnavailable:
       description: The API is temporarily unable to serve the request. This may be returned by the API edge when the backend is unhealthy, or by the backend when an upstream catalog, quoting, or lookup service is unavailable.
       content:
@@ -76,37 +142,18 @@ components:
             error:
               code: service_unavailable
               message: The service is temporarily unavailable. Please try again later.
-    BadGateway:
-      description: The API edge received an invalid response from the backend.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-          example:
-            error:
-              code: bad_gateway
-              message: The API edge received an invalid response from the backend. Please try again later.
-    InternalError:
-      description: An unexpected error occurred.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-          example:
-            error:
-              code: internal_error
-              message: An unexpected error occurred.
-    Forbidden:
-      description: The API key is missing, invalid, not authorized for this API, or the request was blocked at the API edge. Public API requests may receive this edge-generated response before the backend can return a runtime 401. When a request reaches the backend, 403 may also mean the developer account or integration is not in the state required for that operation. For `POST /v1/enrollment-sessions`, that operation documents its own flow-scoped 403 requirements (both flows require approved on-exchange enrollment access, plus `agent_assisted` OAuth link vs `self_service` deeplink agent ID) instead of using this shared response reference.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-          example:
-            error:
-              code: forbidden
-              message: The supplied API key is missing, invalid, or not authorized for this API.
   schemas:
+    PingResponse:
+      type: object
+      additionalProperties: true
+      required:
+      - environment
+      - ok
+      properties:
+        environment:
+          type: string
+        ok:
+          type: boolean
     ErrorResponse:
       type: object
       description: 'Canonical error envelope returned by HealthSherpa-owned API endpoint, infrastructure filter, and backend service failures. The direct enrollment endpoints return their own service failures using `EnrollmentErrorsResponse` (`errors[]`), but edge-generated failures on those endpoints (API Gateway and WAF, e.g. a missing or invalid API key) still use this `ErrorResponse` envelope. Clients should treat `error.code` as the stable programmatic identifier and surface `error.message` to humans. Recognized codes include:
@@ -156,19 +203,12 @@ components:
                 type: array
                 items:
                   type: string
-    PingResponse:
-      type: object
-      additionalProperties: true
-      required:
-      - environment
-      - ok
-      properties:
-        environment:
-          type: string
-        ok:
-          type: boolean
   securitySchemes:
     ApiKeyAuth:
       type: apiKey
       in: header
       name: x-api-key
+      description: 'Developer portal API key. Server-side credential: send it only from your backend and never embed it in browser JavaScript, mobile apps, public environment variables, or source control. Requests made with a key count against that key''s throughput tier and monthly quota. Activating a new key in the developer portal disables the previous key.'
+externalDocs:
+  description: Compliance considerations
+  url: https://one.healthsherpa.com/docs/integration-guide/compliance-considerations.html
