@@ -753,3 +753,9 @@ components:
 externalDocs:
   description: Compliance considerations
   url: https://one.healthsherpa.com/docs/integration-guide/compliance-considerations.html
+x-provenance:
+  method: harvested
+  publisher: HealthSherpa
+  source: https://one.healthsherpa.com/openapi.json
+  note: split by refine-openapis from the provider's own published document, verified by fetch (openapi/_original/*.fetch.json);
+    stamped by stamp-openapi-provenance.py (roadmap#793)
