@@ -64,6 +64,134 @@
 > Full detail: **[Where this data comes from](https://apievangelist.com/about/where-our-data-comes-from)**
 <!-- API-EVANGELIST-PROVENANCE:END -->
 
-HealthSherpa is a company surfaced as a portfolio company of a16z, y-combinator and added to the API Evangelist network as a stub for enrichment. This profile is a lead awaiting the enrichment pipeline.
+HealthSherpa is the leading ACA (Affordable Care Act) health insurance quoting and enrollment platform, and was the first company to partner with CMS to offer Enhanced Direct Enrollment (EDE) for agents. Its developer surface, HealthSherpa ONE (one.healthsherpa.com), exposes a public OpenAPI 3.1 REST API for on- and off-exchange ACA plan quoting, county/issuer/provider reference lookups, agent and self-service enrollment sessions, and an approval-gated direct enrollment API covering the full off-exchange (ICHRA) application lifecycle — create, update, submit, cancel, terminate, supporting-document upload, and payment redirect. Authentication is a single x-api-key header; enrollment writes support Idempotency-Key with 24-hour retention. Separate ICHRA and Medicare Partner APIs provide QuoteConnect/EnrollConnect, deeplinked enrollment, and webhooks. HealthSherpa publishes first-party Agent Skills, an llms.txt, and vibe-coding prompts for agents.
 
-Backed by: a16z, y-combinator
+**Areas:** Company · Health Insurance · Healthcare · ACA · Enrollment · Quoting · Insurance · Enhanced Direct Enrollment · ICHRA
+
+## HealthSherpa on APIs.io
+
+Everything profiled for HealthSherpa is published on APIs.io rather than in this repository. Start at the provider page — **[apis.io/providers/healthsherpa/](https://apis.io/providers/healthsherpa/)** — or go straight to one of the APIs or properties below.
+
+### APIs (5)
+
+- [HealthSherpa Enrollment Sessions API](https://apis.io/apis/healthsherpa/healthsherpa-enrollment-sessions-api/) — The Enrollment Sessions API from HealthSherpa — 1 operation(s) for enrollment sessions.
+- [HealthSherpa Enrollments API](https://apis.io/apis/healthsherpa/healthsherpa-enrollments-api/) — The Enrollments API from HealthSherpa — 7 operation(s) for enrollments.
+- [HealthSherpa Quotes API](https://apis.io/apis/healthsherpa/healthsherpa-quotes-api/) — The Quotes API from HealthSherpa — 1 operation(s) for quotes.
+- [HealthSherpa Reference API](https://apis.io/apis/healthsherpa/healthsherpa-reference-api/) — The Reference API from HealthSherpa — 3 operation(s) for reference.
+- [HealthSherpa Utility API](https://apis.io/apis/healthsherpa/healthsherpa-utility-api/) — The Utility API from HealthSherpa — 1 operation(s) for utility.
+
+### Published properties
+
+Each property below is a page on APIs.io carrying the machine-readable artifact and what it says.
+
+#### AsyncAPI (1)
+
+Event-driven and webhook contracts.
+
+- [Healthsherpa Ichra Webhooks](https://apis.io/asyncapis/healthsherpa/healthsherpa-ichra-webhooks/)
+
+#### MCP servers (1)
+
+Model Context Protocol servers that expose the API to agents.
+
+- [healthsherpa-one](https://apis.io/servers/healthsherpa/healthsherpa-one/)
+
+#### Agent skills (1)
+
+Agent skills built on the API.
+
+- [ichra-platform-integration](https://apis.io/agent-skills/healthsherpa/ichra-platform-integration/)
+
+#### Agentic access (1)
+
+Which operations an agent can call, which act, and which need a human in the loop.
+
+- [Healthsherpa Agentic Access](https://apis.io/agentic-access/healthsherpa/healthsherpa-agentic-access/)
+
+#### Collections (5)
+
+Postman and Open Collection request collections.
+
+- [HealthSherpa Public Enrollment Sessions API](https://apis.io/collections/healthsherpa/open-healthsherpa-enrollment-sessions-api/)
+- [HealthSherpa Public Enrollment Sessions Enrollments API](https://apis.io/collections/healthsherpa/open-healthsherpa-enrollments-api/)
+- [HealthSherpa Public Enrollment Sessions Quotes API](https://apis.io/collections/healthsherpa/open-healthsherpa-quotes-api/)
+- [HealthSherpa Public Enrollment Sessions Reference API](https://apis.io/collections/healthsherpa/open-healthsherpa-reference-api/)
+- [HealthSherpa Public Enrollment Sessions Utility API](https://apis.io/collections/healthsherpa/open-healthsherpa-utility-api/)
+
+#### Overlays (1)
+
+OpenAPI overlays, including conversational phrasing for each operation.
+
+- [Healthsherpa One Overlay](https://apis.io/overlays/healthsherpa/healthsherpa-one-overlay/)
+
+#### Security (2)
+
+Authentication, trust centre, and vulnerability disclosure.
+
+- [Healthsherpa Authentication](https://apis.io/security/healthsherpa/healthsherpa-authentication/)
+- [Healthsherpa Domain Security](https://apis.io/security/healthsherpa/healthsherpa-domain-security/)
+
+## Where to find this API
+
+Links to the company's own pages. This repository publishes no copy of their specifications — the canonical document is theirs and lives at the URLs below.
+
+- [Website](https://www.healthsherpa.com)
+- [Documentation](https://one.healthsherpa.com/docs.html)
+- [Getting started](https://one.healthsherpa.com/vibe-coders.html)
+- [API reference](https://one.healthsherpa.com/docs.html)
+- [Sign up](https://one.healthsherpa.com/register.html)
+- [Compliance](https://www.healthsherpa.com/agents_agencies)
+- [GitHub](https://github.com/healthsherpa)
+
+## API Evangelist rating
+
+**Kin Score 37.9** — thin · rubric 0.24.0 · scored 2026-10-17
+
+| Facet | Score |
+|---|---|
+| Discoverability | 73.2 |
+| Contract quality | 59.4 |
+| Contract governance | 4.5 |
+| Operational transparency | 10.5 |
+| Developer ergonomics | 35.7 |
+| Access clarity | 21.1 |
+
+**Agent readiness 46.8** — agent-ready (gated down from agent-native)
+
+| Agent-readiness dimension | Result |
+|---|---|
+| Spec Presence | yes |
+| Agentic Access | derived (partial credit) |
+| Reversibility Documented | verified |
+| MCP Server | — |
+| Auth Clarity | bearer (partial credit) |
+| Idempotency | verified |
+| Error Semantics | derived (partial credit) |
+| OpenAPI Examples | verified |
+| Rate Limit Signal | verified |
+| Event Surface Described | yes |
+| Agent Skills | yes |
+| Well Known Catalog | — |
+| Consent Identity | — |
+| Agent Card | — |
+| Dry Run Mode | — |
+| Delegated Identity | — |
+| Protected Resource Metadata | — |
+| Dynamic Client Registration | — |
+| Agentic Commerce | — |
+
+**Regulatory alignment 19.3** — Insurance
+
+The rubric is published at [github.com/api-evangelist/kin-score](https://github.com/api-evangelist/kin-score). The per-check breakdown behind these numbers — which checks were earned, partial or missed — along with score history and how this provider compares to its peers, is available at [apis.io/providers/healthsherpa/](https://apis.io/providers/healthsherpa/).
+
+## How this profile is made
+
+API Evangelist profiles a company's public API surface the way a developer would find it: the website, developer portal and documentation, the specifications it publishes, its public repositories, and its pricing, status and changelog pages. From that it derives the properties above — contracts split per API, workflows, schemas, collections, governance rules, plans and rate limits — and scores them against the published [Kin Score rubric](https://github.com/api-evangelist/kin-score).
+
+The artifacts are published on [APIs.io](https://apis.io), not in this repository. This repository is the public record for HealthSherpa: the place to say something is wrong, missing or out of date, and to ask for a re-score or a removal.
+
+## Open an issue
+
+- **Something about this listing** — a wrong description, a missing API, a stale artifact or a question about the rating: [open an issue on this repository](https://github.com/api-evangelist/healthsherpa/issues/new).
+- **A new API, or one that is not in the catalog yet** — [submit it on APIs.io](https://apis.io/add/).
+- **Anything else** — [the APIs.io inbox](https://github.com/api-search/inbox/issues/new) or [info@apievangelist.com](mailto:info@apievangelist.com).
